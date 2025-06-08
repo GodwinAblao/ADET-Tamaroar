@@ -4,9 +4,9 @@
 
 <br />
 <div align="center">
-  <a href="https://github.com/zyx-0314/">
+  <a href="https://ghttps://github.com/GodwinAblao/ADET-Tamaroar">
   <!-- TODO: If you want to add logo or banner you can add it here -->
-    <img src="./assets/img/nyebe_white.png" alt="Nyebe" width="130" height="100">
+    <img src="./assets/img/temporary logo x.png" alt="Tamaroar" width="130" height="100">
   </a>
 <!-- TODO: Change Title to the name of the title of your Project -->
   <h3 align="center">Title</h3>
@@ -79,10 +79,13 @@ Guiding Question:
 ![HTML](https://img.shields.io/badge/HTML-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![CSS](https://img.shields.io/badge/CSS-1572B6?style=for-the-badge&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white)
 
 ## Rules, Practices and Principles
-1. Always use `WD-` in the front of the Title of the Project for the Subject followed by your custom naming.
-2. Do not rename any .html files; always use `index.html` as the filename.
+1. Always use `ADET-` in the front of the Title of the Project for the Subject followed by your custom naming.
+2. Do not rename any .html files; always use `index.php` as the filename.
 3. Place Files in their respective folders.
 4. All file naming are in camel case.
    - Camel case is naming format where there is no white space in separation of each words, the first word is in all lower case while the succeding words first letter are in upper followed by lower cased letters.
@@ -92,7 +95,7 @@ Guiding Question:
 7. File Structure to follow below.
 
 ```
-WD-ProjectName
+ADET-ProjectName
 └─ assets
 |   └─ css
 |   |   └─ style.css
@@ -109,8 +112,8 @@ WD-ProjectName
 |     |  |  └─ fileWith.jpeg/.jpg/.webp/.png
 |     |  └─ js
 |     |     └─ script.js
-|     └─ index.html
-└─ index.html
+|     └─ index.php
+└─ index.php
 └─ readme.md
 ```
 
@@ -119,4 +122,6 @@ WD-ProjectName
 <!-- TODO: Add References -->
 | Title | Purpose | Link |
 |-|-|-|
-| Sample Title | Sample purpose would be here like this and this is the example of what it is. | trykolang.com |
+| Github | Template for Project | https://github.com/zyx-0314/AWD-WD-Template-Project |
+| Github | Badges4-README.md-Profile |https://github.com/alexandresanlim/Badges4-README.md-Profile/blob/master/README.md |
+| Github | Commit guide | https://github.com/zyx-0314/Github-Git-Guide/blob/ef7db7f75870f69828938fd610e478783d1750e9/git/commit.md#L4 |
