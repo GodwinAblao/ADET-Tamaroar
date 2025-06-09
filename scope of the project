@@ -1,0 +1,101 @@
+GENERAL SCOPE OF THE PROJECT
+
+## 1 .CREATE A WEB APPLICATION/ SYSTEM USING PHP : LIBRARY SYSTEM
+
+## 2. THE APPLICATION MUST HAVE THE FOLLOWING CRUD FUNCTIONALITY:
+
+    -CREATE
+    -READ
+    -UPDATE
+    -DELETE FUNCTIONS : FOR ALL FEATURES AND CORE PROCESESSES
+
+## 3. MAKE SURE THAT YOU HAVE A DATABASE FOR BACK UP/STORAGE OF INFORMATION
+
+## 4. THE APPLICATION MUST BE HOSTED ONLINE
+
+## 5. CORRECT VALIDATIONS MUST BE APPLIED
+
+### REQUIRMENTS ###
+
+    1. BOOK ID - the Book ID will be 'GENERATED' from the Book Details
+
+        ex. THFEB102022-FIC00001
+
+        TH - First 2 letters from the Book Title
+        FEB – month (published)
+        10 - day (added to the system)
+        2022 - year (published)
+        FIC - category of book ( FIC = Fiction)
+        00001 - count of books on the library
+
+    2. Only 2 BOOKS will be allowed to be borrowed per student ( 7 days ,included week ends)
+
+    3. Fine of ₱ 10.00 per day per book
+
+    4. Status of Book - you cannot borrow an Archived Book and cannot delete any book
+
+    5. Minimum of 50 books
+
+    6. Admin Account (Librarian), User Account (Student)
+
+
+    tamaroar/
+│
+├── 📁 assets/
+│   ├── 📁 css/
+│   │   └── style.css              ← All your custom styles
+│   ├── 📁 js/
+│   │   └── script.js              ← JS functions (validation, interactivity)
+│   └── 📁 images/
+│       └── (book covers, logos)
+│
+├── 📁 config/
+│   ├── db.php                     ← Database connection
+│   └── session.php               ← Session checking (admin/user)
+│
+├── 📁 includes/
+│   ├── header.php                ← Top nav (reusable)
+│   └── footer.php                ← Footer (reusable)
+│
+├── 📁 admin/                     ← Librarian dashboard
+│   ├── dashboard.php
+│   ├── manage_books.php
+│   ├── manage_users.php
+│   ├── borrow_records.php
+│   └── add_book.php, edit_book.php
+│
+├── 📁 student/                   ← Student dashboard
+│   ├── dashboard.php
+│   ├── browse_books.php
+│   ├── borrowed_books.php
+│   └── fines.php
+│
+├── 📁 actions/                   ← Handles backend logic
+│   ├── login.php
+│   ├── logout.php
+│   ├── register.php
+│   ├── add_book.php
+│   ├── update_book.php
+│   ├── delete_book.php
+│   ├── borrow_book.php
+│   └── return_book.php
+│
+├── 📁 uploads/                   ← Uploaded book cover images
+│   └── (book1.jpg, book2.jpg...)
+│
+├── 📄 index.php                  ← Login page
+├── 📄 register.php               ← Student registration
+├── 📄 dashboard.php              ← Redirects based on role
+├── 📄 .gitignore                 ← Ignore `/uploads`, passwords, etc.
+├── 📄 README.md                  ← Project summary & how to run
+└── 📄 library.sql                ← SQL backup for database
+
+
+### http://localhost/phpmyadmin/index.php?route=/database/structure&db=tamaroar_library ###
+
+##admin
+admin@tamaroar.com
+admin123
+##user
+wengdrich@gmail.com
+123
