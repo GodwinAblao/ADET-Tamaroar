@@ -110,7 +110,7 @@ if ($_SESSION['role'] !== 'admin') {
         </aside>
 
         <main class="content-area" id="content-area">
-            <h3>Welcome, Admin <?php echo htmlspecialchars($_SESSION['name']); ?>!</h3>
+            <h3>Welcome, Admin <?php echo htmlspecialchars($_SESSION['full_name']); ?>!</h3>
             <p>Select an option from the menu to get started.</p>
         </main>
     </div>

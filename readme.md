@@ -1,127 +1,233 @@
-<a name="readme-top">
+# Tamaroar Library System
 
-<br/>
+A comprehensive PHP-based library management system with user authentication, book management, borrowing system, and fine calculation.
 
-<br />
-<div align="center">
-  <a href="https://ghttps://github.com/GodwinAblao/ADET-Tamaroar">
-  <!-- TODO: If you want to add logo or banner you can add it here -->
-    <img src="./assets/img/temporary logo x.png" alt="Tamaroar" width="130" height="100">
-  </a>
-<!-- TODO: Change Title to the name of the title of your Project -->
-  <h3 align="center">Title</h3>
-</div>
-<!-- TODO: Make a short description -->
-<div align="center">
-  Short Description. (Optional)
-</div>
+## Features
 
-<br />
+### 🔐 User Management
+- **Admin Account (Librarian)**: Full system access
+- **Student Account**: Browse and borrow books
+- Secure login/registration system
+- Role-based access control
 
-<!-- TODO: Change the zyx-0314 into your github username  -->
-<!-- TODO: Change the WD-Template-Project into the same name of your folder -->
-![](https://visit-counter.vercel.app/counter.png?page=zyx-0314/WD-Template-Project)
+### 📚 Book Management
+- **Automatic Book ID Generation**: Format `THFEB102024-FIC00001`
+  - `TH` - First 2 letters from Book Title
+  - `FEB` - Month abbreviation (published)
+  - `10` - Day when added to system
+  - `2024` - Current year
+  - `FIC` - Category code
+  - `00001` - Sequential number for category
+- **Book Categories**: Fiction, Non-Fiction, Reference, Technology, Science, History, Biography, Poetry, Drama, Children
+- **Book Status**: Active/Archived (archived books cannot be borrowed)
+- **Cover Image Upload**: Support for JPG, JPEG, PNG, GIF formats
+- **Minimum 50 Books**: System comes with 50 sample books
 
-[![wakatime](https://wakatime.com/badge/user/018dd99a-4985-4f98-8216-6ca6fe2ce0f8/project/63501637-9a31-42f0-960d-4d0ab47977f8.svg)](https://wakatime.com/badge/user/018dd99a-4985-4f98-8216-6ca6fe2ce0f8/project/63501637-9a31-42f0-960d-4d0ab47977f8)
+### 📖 Borrowing System
+- **Borrowing Limit**: Maximum 2 books per student
+- **Loan Period**: 7 days (including weekends)
+- **Fine System**: ₱10.00 per day per book for overdue items
+- **Real-time Availability**: Track available copies
+- **Borrowing History**: Complete record of all transactions
+
+### 💰 Fine Management
+- **Automatic Calculation**: Fines calculated on return
+- **Fine History**: Track all fine payments
+- **Overdue Tracking**: Real-time overdue book monitoring
+- **Payment Integration**: Ready for payment system integration
+
+### 🎨 User Interface
+- **Modern Design**: Glassmorphism UI with gradient backgrounds
+- **Responsive Layout**: Works on desktop, tablet, and mobile
+- **Intuitive Navigation**: Easy-to-use interface for all users
+- **Real-time Updates**: Dynamic content loading
+
+## System Requirements
+
+- **PHP**: 7.4 or higher
+- **MySQL**: 5.7 or higher
+- **Web Server**: Apache/Nginx
+- **PHP Extensions**: mysqli, session, fileinfo
+
+## Installation
+
+### 1. Database Setup
+
+1. Create a MySQL database named `tamaroar_library`
+2. Import the database structure:
+   ```bash
+   mysql -u root -p tamaroar_library < library_system.sql
+   ```
+
+### 2. Configuration
+
+1. Update database connection in `config/db.php`:
+   ```php
+   $host = 'localhost';
+   $user = 'your_username';
+   $pass = 'your_password';
+   $dbname = 'tamaroar_library';
+   ```
+
+2. Ensure the `uploads/` directory is writable:
+   ```bash
+   chmod 755 uploads/
+   ```
+
+### 3. Web Server Configuration
+
+1. Place the project in your web server directory
+2. Ensure URL rewriting is enabled (for clean URLs)
+3. Set proper file permissions
+
+### 4. Default Accounts
+
+**Admin Account:**
+- Email: `admin@tamaroar.com`
+- Password: `password`
+
+**Sample Student Accounts:**
+- Email: `john.doe@student.com` / Password: `password`
+- Email: `jane.smith@student.com` / Password: `password`
+- Email: `mike.johnson@student.com` / Password: `password`
+
+## File Structure
+
+```
+ADET-Tamaroar/
+├── actions/                 # Form processing scripts
+│   ├── login.php           # User authentication
+│   ├── register.php        # User registration
+│   ├── add_book.php        # Add new books
+│   ├── borrow_book.php     # Borrow books
+│   ├── return_book.php     # Return books
+│   └── ...
+├── admin/                  # Admin interface
+│   ├── dashboard.php       # Admin dashboard
+│   ├── add_book.php        # Add book form
+│   └── ...
+├── student/                # Student interface
+│   ├── dashboard.php       # Student dashboard
+│   ├── browse_books.php    # Browse available books
+│   ├── borrow_books.php    # View borrowed books
+│   └── fines.php          # View fines
+├── config/                 # Configuration files
+│   ├── db.php             # Database connection
+│   ├── session.php        # Session management
+│   └── functions.php      # Helper functions
+├── uploads/               # Book cover images
+├── assets/                # Static assets
+├── index.php              # Login page
+├── register.php           # Registration page
+└── library_system.sql     # Database structure
+```
+
+## Key Features Implementation
+
+### Book ID Generation
+The system automatically generates unique book IDs using the specified format:
+- Extracts first 2 letters from book title
+- Uses month abbreviation from publication date
+- Includes current date when added to system
+- Appends category code and sequential number
+
+### Fine Calculation
+- Calculates fines at ₱10.00 per day per book
+- Includes weekends in calculation
+- Updates fine amount on book return
+- Tracks fine history for reporting
+
+### Borrowing Validation
+- Enforces 2-book limit per student
+- Prevents borrowing archived books
+- Checks book availability in real-time
+- Validates user permissions
+
+### Security Features
+- Password hashing using PHP's `password_hash()`
+- SQL injection prevention with prepared statements
+- XSS protection with `htmlspecialchars()`
+- Session-based authentication
+- Role-based access control
+
+## Usage
+
+### For Administrators
+1. **Login** with admin credentials
+2. **Add Books**: Use the "Add Book" feature to add new books
+3. **Manage Books**: Edit book details, change status, update copies
+4. **View Records**: Monitor borrowing records and user activity
+5. **User Management**: Manage student accounts
+
+### For Students
+1. **Register/Login** with student account
+2. **Browse Books**: Search and filter available books
+3. **Borrow Books**: Borrow up to 2 books for 7 days
+4. **Return Books**: Return books on time to avoid fines
+5. **View Fines**: Check fine status and payment history
+
+## Customization
+
+### Adding New Categories
+Edit the `getBookCategories()` function in `config/functions.php`:
+```php
+function getBookCategories() {
+    return [
+        'FIC' => 'Fiction',
+        'NON' => 'Non-Fiction',
+        // Add your categories here
+    ];
+}
+```
+
+### Modifying Fine Rate
+Update the fine calculation in `config/functions.php`:
+```php
+function calculateFine($due_date, $return_date = null) {
+    // Change the multiplier (currently 10.00)
+    $fine_amount = $days_overdue * 10.00;
+}
+```
+
+### Changing Borrowing Limits
+Modify the `canUserBorrow()` function in `config/functions.php`:
+```php
+function canUserBorrow($user_id) {
+    // Change the limit (currently 2)
+    return $row['borrowed_count'] < 2;
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Database Connection Error**
+   - Check database credentials in `config/db.php`
+   - Ensure MySQL service is running
+   - Verify database exists
+
+2. **Upload Errors**
+   - Check `uploads/` directory permissions
+   - Verify PHP file upload settings
+   - Check file size limits
+
+3. **Session Issues**
+   - Ensure session directory is writable
+   - Check PHP session configuration
+   - Clear browser cookies
+
+### Error Logs
+Check your web server error logs for detailed error messages.
+
+## Support
+
+For technical support or feature requests, please contact the development team.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
 
-<br />
-<br />
-
-<!-- TODO: If you want to add more layers for your readme -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#overview">Overview</a>
-      <ol>
-        <li>
-          <a href="#key-components">Key Components</a>
-        </li>
-        <li>
-          <a href="#technology">Technology</a>
-        </li>
-      </ol>
-    </li>
-    <li>
-      <a href="#rule,-practices-and-principles">Rules, Practices and Principles</a>
-    </li>
-    <li>
-      <a href="#resources">Resources</a>
-    </li>
-  </ol>
-</details>
-
----
-
-## Overview
-
-<!-- TODO: To be changed -->
-<!-- The following are just sample -->
-Description of the project in details.
-
-Guiding Question:
-- What is the project
-- Whats the purpose
-- What are key components
-- What technology used and how it is used
-
-### Key Components
-<!-- TODO: List of Key Components -->
-<!-- The following are just sample -->
-- MultiPage Website/Single Page Website
-- Parallax transition
-- Transactional
-
-### Technology
-<!-- TODO: List of Technology Used -->
-![HTML](https://img.shields.io/badge/HTML-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![CSS](https://img.shields.io/badge/CSS-1572B6?style=for-the-badge&logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=white)
-![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)
-![Bootstrap](https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white)
-
-## Rules, Practices and Principles
-1. Always use `ADET-` in the front of the Title of the Project for the Subject followed by your custom naming.
-2. Do not rename any .html files; always use `index.php` as the filename.
-3. Place Files in their respective folders.
-4. All file naming are in camel case.
-   - Camel case is naming format where there is no white space in separation of each words, the first word is in all lower case while the succeding words first letter are in upper followed by lower cased letters.
-   - ex.: buttonAnimatedStyle.css
-5. Use only `External CSS`.
-6. Renaming of Pages folder names are a must, and relates to what it is doing or data it holding.
-7. File Structure to follow below.
-
-```
-ADET-ProjectName
-└─ assets
-|   └─ css
-|   |   └─ style.css
-|   └─ img
-|   |   └─ fileWith.jpeg/.jpg/.webp/.png
-|   └─ js
-|       └─ script.js
-└─ pages
-|  └─ pageName
-|     └─ assets
-|     |  └─ css
-|     |  |  └─ style.css
-|     |  └─ img
-|     |  |  └─ fileWith.jpeg/.jpg/.webp/.png
-|     |  └─ js
-|     |     └─ script.js
-|     └─ index.php
-└─ index.php
-└─ readme.md
-```
-
-## Resources
-
-<!-- TODO: Add References -->
-| Title | Purpose | Link |
-|-|-|-|
-| Github | Template for Project | https://github.com/zyx-0314/AWD-WD-Template-Project |
-| Github | Badges4-README.md-Profile |https://github.com/alexandresanlim/Badges4-README.md-Profile/blob/master/README.md |
-| Github | Commit guide | https://github.com/zyx-0314/Github-Git-Guide/blob/ef7db7f75870f69828938fd610e478783d1750e9/git/commit.md#L4 |
+**Tamaroar Library System** - A modern, efficient library management solution built with PHP and MySQL.

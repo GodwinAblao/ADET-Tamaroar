@@ -1,71 +1,88 @@
 <?php
 session_start();
 require_once '../config/db.php';
+require_once '../config/functions.php';
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'student') {
-    header("Location: ../index.php");
+// Check if user is logged in
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
+    header('Location: ../index.php');
     exit;
 }
 
-$user_id = $_SESSION['user_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $user_id = $_SESSION['user_id'];
+    $book_id = intval($_POST['book_id']);
 
-if (isset($_GET['id'])) {
-    $book_id = intval($_GET['id']);
-
-    // Check if the book exists and is available
-    $bookCheck = $conn->prepare("SELECT status FROM books WHERE book_id = ?");
-    $bookCheck->bind_param("i", $book_id);
-    $bookCheck->execute();
-    $bookResult = $bookCheck->get_result();
-
-    if ($bookResult->num_rows === 0) {
-        header("Location: ../student/browse_books.php?error=Book+not+found");
+    // Validate book ID
+    if ($book_id <= 0) {
+        $_SESSION['error'] = 'Invalid book selection.';
+        header("Location: ../student/browse_books.php");
         exit;
     }
 
-    $book = $bookResult->fetch_assoc();
-
-    if ($book['status'] === 'Archived') {
-        header("Location: ../student/browse_books.php?error=Cannot+borrow+archived+book");
+    // Check if user can borrow more books (max 2)
+    if (!canUserBorrow($user_id)) {
+        $_SESSION['error'] = 'You can only borrow 2 books at a time. Please return a book first.';
+        header("Location: ../student/browse_books.php");
         exit;
     }
 
-    if ($book['status'] === 'Borrowed') {
-        header("Location: ../student/browse_books.php?error=Book+already+borrowed");
+    // Check if book is available
+    if (!isBookAvailable($book_id)) {
+        $_SESSION['error'] = 'This book is not available for borrowing.';
+        header("Location: ../student/browse_books.php");
         exit;
     }
 
-    // Check if user already borrowed 2 books
-    $borrowCheck = $conn->prepare("SELECT COUNT(*) as total FROM borrow_records WHERE user_id = ? AND return_date IS NULL");
-    $borrowCheck->bind_param("i", $user_id);
-    $borrowCheck->execute();
-    $borrowResult = $borrowCheck->get_result();
-    $borrowData = $borrowResult->fetch_assoc();
+    // Check if user has already borrowed this book
+    $stmt = $conn->prepare("SELECT id FROM borrowings WHERE user_id = ? AND book_id = ? AND status = 'borrowed'");
+    $stmt->bind_param("ii", $user_id, $book_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    if ($borrowData['total'] >= 2) {
-        header("Location: ../student/browse_books.php?error=Limit+reached:+You+can+only+borrow+2+books");
+    if ($result->num_rows > 0) {
+        $_SESSION['error'] = 'You have already borrowed this book.';
+        header("Location: ../student/browse_books.php");
         exit;
     }
 
-    // Borrow the book
-    $borrowDate = date('Y-m-d');
-    $dueDate = date('Y-m-d', strtotime('+7 days'));
+    // Calculate due date (7 days from now, including weekends)
+    $borrow_date = date('Y-m-d');
+    $due_date = date('Y-m-d', strtotime('+7 days'));
 
-    $borrowStmt = $conn->prepare("INSERT INTO borrow_records (user_id, book_id, borrow_date, due_date) VALUES (?, ?, ?, ?)");
-    $borrowStmt->bind_param("iiss", $user_id, $book_id, $borrowDate, $dueDate);
+    // Start transaction
+    $conn->begin_transaction();
 
-    if ($borrowStmt->execute()) {
-        // Update book status
-        $updateStmt = $conn->prepare("UPDATE books SET status = 'Borrowed' WHERE book_id = ?");
-        $updateStmt->bind_param("i", $book_id);
-        $updateStmt->execute();
+    try {
+        // Insert borrowing record
+        $stmt = $conn->prepare("INSERT INTO borrowings (user_id, book_id, borrow_date, due_date, status) VALUES (?, ?, ?, ?, 'borrowed')");
+        $stmt->bind_param("iiss", $user_id, $book_id, $borrow_date, $due_date);
 
-        header("Location: ../student/borrowed_books.php?success=Book+borrowed+successfully");
-    } else {
-        header("Location: ../student/browse_books.php?error=Failed+to+borrow+book");
+        if (!$stmt->execute()) {
+            throw new Exception('Error creating borrowing record.');
+        }
+
+        // Update book availability
+        if (!updateBookAvailability($book_id, 'borrow')) {
+            throw new Exception('Error updating book availability.');
+        }
+
+        // Commit transaction
+        $conn->commit();
+
+        $_SESSION['success'] = 'Book borrowed successfully! Due date: ' . date('F j, Y', strtotime($due_date));
+        header("Location: ../student/borrow_books.php");
+        exit;
+
+    } catch (Exception $e) {
+        // Rollback transaction
+        $conn->rollback();
+        $_SESSION['error'] = 'Error borrowing book: ' . $e->getMessage();
+        header("Location: ../student/browse_books.php");
+        exit;
     }
-
 } else {
-    header("Location: ../student/browse_books.php?error=Invalid+Request");
+    header("Location: ../student/browse_books.php");
+    exit;
 }
 ?>

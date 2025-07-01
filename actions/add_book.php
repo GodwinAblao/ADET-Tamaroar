@@ -1,14 +1,21 @@
 <?php
 session_start();
 require_once '../config/db.php';
+require_once '../config/functions.php';
+
+// Check if user is admin
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header('Location: ../index.php');
+    exit;
+}
 
 // Only handle POST request
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Sanitize and assign inputs
-    $title = isset($_POST['title']) ? trim($_POST['title']) : null;
-    $author = isset($_POST['author']) ? trim($_POST['author']) : null;
-    $category = isset($_POST['category']) ? trim($_POST['category']) : null;
+    $title = isset($_POST['title']) ? sanitizeInput($_POST['title']) : null;
+    $author = isset($_POST['author']) ? sanitizeInput($_POST['author']) : null;
+    $category = isset($_POST['category']) ? sanitizeInput($_POST['category']) : null;
 
     $published_year = isset($_POST['published_year']) ? intval($_POST['published_year']) : null;
     $published_month = isset($_POST['published_month']) ? intval($_POST['published_month']) : null;
@@ -19,6 +26,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate required fields
     if (!$title || !$author || !$category || !$published_year || !$published_month || !$published_day || $copies < 1) {
         $_SESSION['error'] = 'Please fill in all required fields correctly.';
+        header('Location: ../admin/add_book.php');
+        exit;
+    }
+
+    // Validate date
+    if (!checkdate($published_month, $published_day, $published_year)) {
+        $_SESSION['error'] = 'Invalid publication date.';
         header('Location: ../admin/add_book.php');
         exit;
     }
@@ -35,6 +49,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (in_array($fileExtension, $allowedfileExtensions)) {
             $newFileName = md5(time() . $fileName) . '.' . $fileExtension;
             $uploadFileDir = '../uploads/';
+            
+            // Create uploads directory if it doesn't exist
+            if (!is_dir($uploadFileDir)) {
+                mkdir($uploadFileDir, 0755, true);
+            }
+            
             $dest_path = $uploadFileDir . $newFileName;
 
             if (move_uploaded_file($fileTmpPath, $dest_path)) {
@@ -51,12 +71,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // Generate book ID
+    $book_id = generateBookId($title, $published_month, $published_day, $published_year, $category);
+
     // Insert book into DB
-    $stmt = $conn->prepare("INSERT INTO books (title, author, category, published_year, published_month, published_day, copies, cover_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssiiiis", $title, $author, $category, $published_year, $published_month, $published_day, $copies, $cover_image);
+    $stmt = $conn->prepare("INSERT INTO books (book_id, title, author, category, published_year, published_month, published_day, copies, available_copies, cover_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssssiiiiss", $book_id, $title, $author, $category, $published_year, $published_month, $published_day, $copies, $copies, $cover_image);
 
     if ($stmt->execute()) {
-        $_SESSION['success'] = "Book added successfully!";
+        $_SESSION['success'] = "Book added successfully! Book ID: " . $book_id;
         header("Location: ../admin/manage_books.php");
         exit;
     } else {

@@ -6,7 +6,7 @@ if ($_SESSION['role'] !== 'student') {
     exit;
 }
 
-$name = htmlspecialchars($_SESSION['name']);
+$name = htmlspecialchars($_SESSION['full_name']);
 ?>
 
 <!DOCTYPE html>
