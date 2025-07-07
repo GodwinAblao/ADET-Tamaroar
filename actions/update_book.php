@@ -6,15 +6,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'] ?? null;
     $title = trim($_POST['title'] ?? '');
     $author = trim($_POST['author'] ?? '');
-    $category = trim($_POST['category'] ?? '');
-    $published_year = $_POST['published_year'] ?? null;
-    $copies = $_POST['copies'] ?? 1;
+    $category_id = isset($_POST['category_id']) ? intval($_POST['category_id']) : null;
+    $isbn = isset($_POST['isbn']) ? sanitizeInput($_POST['isbn']) : null;
+    $description = isset($_POST['description']) ? sanitizeInput($_POST['description']) : null;
+    $published_year = isset($_POST['published_year']) ? intval($_POST['published_year']) : null;
+    $published_month = isset($_POST['published_month']) ? intval($_POST['published_month']) : null;
+    $published_day = isset($_POST['published_day']) ? intval($_POST['published_day']) : null;
+    $copies = isset($_POST['copies']) ? intval($_POST['copies']) : 1;
 
-    if (empty($id) || empty($title) || empty($author) || empty($category) || empty($published_year)) {
+    if (empty($id) || empty($title) || empty($author) || empty($category_id) || empty($published_year) || empty($published_month) || empty($published_day)) {
         $_SESSION['error'] = "All fields are required.";
         header("Location: ../admin/edit_book.php?id=" . urlencode($id));
         exit;
     }
+
+    // Combine published date
+    $published_date = sprintf('%04d-%02d-%02d', $published_year, $published_month, $published_day);
 
     // Optional: handle cover image update
     $cover_image = null;
@@ -43,14 +50,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Update the database
+    // Update book in DB
+    $sql = "UPDATE books SET title=?, author=?, category_id=?, isbn=?, published_date=?, description=?, copies=?, available_copies=?";
+    $params = [$title, $author, $category_id, $isbn, $published_date, $description, $copies, $copies];
     if ($cover_image) {
-        $stmt = $conn->prepare("UPDATE books SET title=?, author=?, category=?, published_year=?, copies=?, cover_image=? WHERE id=?");
-        $stmt->bind_param("sssissi", $title, $author, $category, $published_year, $copies, $cover_image, $id);
-    } else {
-        $stmt = $conn->prepare("UPDATE books SET title=?, author=?, category=?, published_year=?, copies=? WHERE id=?");
-        $stmt->bind_param("sssisi", $title, $author, $category, $published_year, $copies, $id);
+        $sql .= ", cover_image=?";
+        $params[] = $cover_image;
     }
+    $sql .= " WHERE id=?";
+    $params[] = $id;
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param(str_repeat('s', count($params)), ...$params);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = "Book updated successfully!";

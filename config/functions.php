@@ -6,42 +6,53 @@ require_once 'db.php';
  * Format: THFEB102022-FIC00001
  * TH - First 2 letters from the Book Title
  * FEB – month (published)
- * 10 - day (added to the system)
+ * 10 - day (published)
  * 2022 - year (published)
- * FIC - category of book ( FIC = Fiction)
- * 00001 - count of books on the library
+ * FIC - category code (from categories table)
+ * 00001 - count of books in this category
  */
-function generateBookId($title, $published_month, $published_day, $published_year, $category) {
+function generateBookId($title, $published_month, $published_day, $published_year, $category_id) {
     global $conn;
-    
+
     // Get first 2 letters from title (uppercase)
     $title_prefix = strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $title), 0, 2));
-    
+
     // Get month abbreviation
     $months = [
         1 => 'JAN', 2 => 'FEB', 3 => 'MAR', 4 => 'APR', 5 => 'MAY', 6 => 'JUN',
         7 => 'JUL', 8 => 'AUG', 9 => 'SEP', 10 => 'OCT', 11 => 'NOV', 12 => 'DEC'
     ];
     $month_abbr = $months[$published_month] ?? 'JAN';
-    
-    // Get current day when adding to system
-    $current_day = date('d');
-    $current_year = date('Y');
-    
+
+    // Use published day and year
+    $day = str_pad($published_day, 2, '0', STR_PAD_LEFT);
+    $year = $published_year;
+
+    // Get category code from categories table
+    $category_code = 'GEN'; // Default code
+    $stmt = $conn->prepare("SELECT name FROM categories WHERE id = ?");
+    $stmt->bind_param("i", $category_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($row = $result->fetch_assoc()) {
+        // Map category name to code (first 3 uppercase letters, e.g., 'Fiction' => 'FIC')
+        $category_code = strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $row['name']), 0, 3));
+    }
+
     // Get book count for this category
-    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM books WHERE category = ?");
-    $stmt->bind_param("s", $category);
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM books WHERE category_id = ?");
+    $stmt->bind_param("i", $category_id);
     $stmt->execute();
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
     $book_count = $row['count'] + 1;
-    
+
     // Format book count with leading zeros
     $formatted_count = str_pad($book_count, 5, '0', STR_PAD_LEFT);
-    
+
     // Generate the book ID
-    $book_id = $title_prefix . $month_abbr . $current_day . $current_year . '-' . $category . $formatted_count;
-    
+    $book_id = $title_prefix . $month_abbr . $day . $year . '-' . $category_code . $formatted_count;
+
     return $book_id;
 }
 

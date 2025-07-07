@@ -10,28 +10,26 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
 
 $user_id = $_SESSION['user_id'];
 
-// Get user's fines
+// Get borrowing history
 $stmt = $pdo->prepare("
-    SELECT b.*, bk.title, bk.author, bk.book_id as book_code
+    SELECT b.*, bk.title, bk.author, bk.book_id as book_code, bk.cover_image
     FROM borrowings b
     JOIN books bk ON b.book_id = bk.id
-    WHERE b.user_id = ? AND b.fine_amount > 0
-    ORDER BY b.borrowed_date DESC
+    WHERE b.user_id = ? AND b.status = 'returned'
+    ORDER BY b.returned_date DESC
 ");
 $stmt->execute([$user_id]);
-$fines = $stmt->fetchAll();
+$history = $stmt->fetchAll();
 
-// Calculate total fines
+// Get statistics
+$totalBorrowed = count($history);
 $totalFines = 0;
-$paidFines = 0;
-$unpaidFines = 0;
+$totalPaid = 0;
 
-foreach ($fines as $fine) {
-    $totalFines += $fine['fine_amount'];
-    if ($fine['fine_paid']) {
-        $paidFines += $fine['fine_amount'];
-    } else {
-        $unpaidFines += $fine['fine_amount'];
+foreach ($history as $record) {
+    $totalFines += $record['fine_amount'];
+    if ($record['fine_paid']) {
+        $totalPaid += $record['fine_amount'];
     }
 }
 ?>
@@ -41,7 +39,7 @@ foreach ($fines as $fine) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Fines - Student Panel</title>
+    <title>History - Student Panel</title>
     <link rel="stylesheet" href="../assets/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -178,7 +176,7 @@ foreach ($fines as $fine) {
             margin-bottom: 1rem;
         }
 
-        .fines-section {
+        .history-section {
             background: var(--white);
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -196,7 +194,7 @@ foreach ($fines as $fine) {
             padding: 2rem;
         }
 
-        .fine-item {
+        .history-item {
             display: flex;
             align-items: center;
             padding: 1.5rem;
@@ -207,14 +205,14 @@ foreach ($fines as $fine) {
             background: var(--white);
         }
 
-        .fine-item:hover {
+        .history-item:hover {
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             transform: translateY(-2px);
         }
 
         .book-cover {
-            width: 60px;
-            height: 80px;
+            width: 80px;
+            height: 100px;
             background: var(--gray);
             border-radius: 8px;
             display: flex;
@@ -222,48 +220,55 @@ foreach ($fines as $fine) {
             justify-content: center;
             margin-right: 1.5rem;
             flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .book-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .book-cover i {
-            font-size: 1.5rem;
+            font-size: 2rem;
             color: var(--primary);
         }
 
-        .fine-info {
+        .history-info {
             flex: 1;
         }
 
-        .fine-info h4 {
+        .history-info h4 {
             color: var(--primary);
             margin-bottom: 0.5rem;
             font-size: 1.1rem;
         }
 
-        .fine-info p {
+        .history-info p {
             color: #666;
             margin-bottom: 0.5rem;
         }
 
-        .fine-details {
+        .history-details {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 1rem;
             margin-top: 1rem;
         }
 
-        .fine-detail {
+        .history-detail {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .fine-detail i {
+        .history-detail i {
             color: var(--primary);
             width: 16px;
         }
 
         .fine-amount {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: #e74c3c;
             margin-left: auto;
@@ -277,14 +282,9 @@ foreach ($fines as $fine) {
             margin-left: 1rem;
         }
 
-        .status-paid {
+        .status-returned {
             background: #d4edda;
             color: #155724;
-        }
-
-        .status-unpaid {
-            background: #f8d7da;
-            color: #721c24;
         }
 
         .empty-state {
@@ -315,8 +315,8 @@ foreach ($fines as $fine) {
                 <li><a href="enhanced_dashboard.php"><i class="fas fa-home"></i> Dashboard</a></li>
                 <li><a href="enhanced_browse_books.php"><i class="fas fa-search"></i> Browse Books</a></li>
                 <li><a href="my_books.php"><i class="fas fa-book"></i> My Books</a></li>
-                <li><a href="fines.php" class="active"><i class="fas fa-money-bill-wave"></i> My Fines</a></li>
-                <li><a href="history.php"><i class="fas fa-history"></i> History</a></li>
+                <li><a href="fines.php"><i class="fas fa-money-bill-wave"></i> My Fines</a></li>
+                <li><a href="history.php" class="active"><i class="fas fa-history"></i> History</a></li>
                 <li><a href="profile.php"><i class="fas fa-user"></i> Profile</a></li>
                 <li><a href="../actions/logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
@@ -324,75 +324,80 @@ foreach ($fines as $fine) {
         
         <div class="main-content">
             <div class="page-header">
-                <h1 class="page-title">My Fines</h1>
-                <p class="page-subtitle">View and manage your library fines</p>
+                <h1 class="page-title">Borrowing History</h1>
+                <p class="page-subtitle">View your complete borrowing history and statistics</p>
             </div>
             
-            <!-- Fines Statistics -->
+            <!-- History Statistics -->
             <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-book icon"></i>
+                    <h3>Total Books Borrowed</h3>
+                    <div class="number"><?php echo $totalBorrowed; ?></div>
+                </div>
                 <div class="stat-card">
                     <i class="fas fa-exclamation-triangle icon"></i>
                     <h3>Total Fines</h3>
                     <div class="number">₱<?php echo number_format($totalFines, 2); ?></div>
                 </div>
                 <div class="stat-card">
-                    <i class="fas fa-times-circle icon"></i>
-                    <h3>Unpaid Fines</h3>
-                    <div class="number">₱<?php echo number_format($unpaidFines, 2); ?></div>
-                </div>
-                <div class="stat-card">
                     <i class="fas fa-check-circle icon"></i>
-                    <h3>Paid Fines</h3>
-                    <div class="number">₱<?php echo number_format($paidFines, 2); ?></div>
+                    <h3>Fines Paid</h3>
+                    <div class="number">₱<?php echo number_format($totalPaid, 2); ?></div>
                 </div>
             </div>
             
-            <!-- Fines List -->
-            <div class="fines-section">
+            <!-- History List -->
+            <div class="history-section">
                 <div class="section-header">
-                    <h3>Fine Details</h3>
+                    <h3>Borrowing History</h3>
                 </div>
                 <div class="section-content">
-                    <?php if (empty($fines)): ?>
+                    <?php if (empty($history)): ?>
                         <div class="empty-state">
-                            <i class="fas fa-check-circle"></i>
-                            <h3>No Fines Found</h3>
-                            <p>Great! You don't have any library fines.</p>
+                            <i class="fas fa-history"></i>
+                            <h3>No History Yet</h3>
+                            <p>Your borrowing history will appear here once you return books.</p>
                         </div>
                     <?php else: ?>
-                        <?php foreach ($fines as $fine): ?>
-                            <div class="fine-item">
+                        <?php foreach ($history as $record): ?>
+                            <div class="history-item">
                                 <div class="book-cover">
-                                    <i class="fas fa-book"></i>
+                                    <?php if ($record['cover_image']): ?>
+                                        <img src="../<?php echo htmlspecialchars($record['cover_image']); ?>" alt="Book Cover">
+                                    <?php else: ?>
+                                        <i class="fas fa-book"></i>
+                                    <?php endif; ?>
                                 </div>
-                                <div class="fine-info">
-                                    <h4><?php echo htmlspecialchars($fine['title']); ?></h4>
-                                    <p>by <?php echo htmlspecialchars($fine['author']); ?></p>
-                                    <div class="fine-details">
-                                        <div class="fine-detail">
+                                <div class="history-info">
+                                    <h4><?php echo htmlspecialchars($record['title']); ?></h4>
+                                    <p>by <?php echo htmlspecialchars($record['author']); ?></p>
+                                    <div class="history-details">
+                                        <div class="history-detail">
                                             <i class="fas fa-calendar"></i>
-                                            <span>Due: <?php echo date('M d, Y', strtotime($fine['due_date'])); ?></span>
+                                            <span>Borrowed: <?php echo date('M d, Y', strtotime($record['borrowed_date'])); ?></span>
                                         </div>
-                                        <div class="fine-detail">
+                                        <div class="history-detail">
                                             <i class="fas fa-clock"></i>
-                                            <span>Days Overdue: <?php 
-                                                $due = new DateTime($fine['due_date']);
-                                                $today = new DateTime();
-                                                $interval = $due->diff($today);
-                                                echo $interval->days;
-                                            ?></span>
+                                            <span>Due: <?php echo date('M d, Y', strtotime($record['due_date'])); ?></span>
                                         </div>
-                                        <div class="fine-detail">
+                                        <div class="history-detail">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span>Returned: <?php echo date('M d, Y', strtotime($record['returned_date'])); ?></span>
+                                        </div>
+                                        <div class="history-detail">
                                             <i class="fas fa-barcode"></i>
-                                            <span>Code: <?php echo htmlspecialchars($fine['book_code']); ?></span>
+                                            <span>Code: <?php echo htmlspecialchars($record['book_code']); ?></span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="fine-amount">
-                                    ₱<?php echo number_format($fine['fine_amount'], 2); ?>
-                                </div>
-                                <span class="status-badge status-<?php echo $fine['fine_paid'] ? 'paid' : 'unpaid'; ?>">
-                                    <?php echo $fine['fine_paid'] ? 'Paid' : 'Unpaid'; ?>
+                                <?php if ($record['fine_amount'] > 0): ?>
+                                    <div class="fine-amount">
+                                        ₱<?php echo number_format($record['fine_amount'], 2); ?>
+                                    </div>
+                                <?php endif; ?>
+                                <span class="status-badge status-returned">
+                                    Returned
                                 </span>
                             </div>
                         <?php endforeach; ?>

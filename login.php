@@ -5,13 +5,12 @@ if (isset($_SESSION['user_id'])) {
     exit;
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Register - Tamaroar Library</title>
+    <title>Login - Tamaroar Library</title>
     <link rel="stylesheet" href="assets/style.css">
     <style>
         .logo-link {
@@ -27,8 +26,8 @@ if (isset($_SESSION['user_id'])) {
             height: 80px;
             width: auto;
         }
-        /* Ensure text input has oval styling */
-        .login-container input[type="text"] {
+        .login-container input[type="email"],
+        .login-container input[type="password"] {
             padding: 0.75rem 1rem;
             border: 1px solid #e0e0e0;
             border-radius: 30px;
@@ -36,7 +35,8 @@ if (isset($_SESSION['user_id'])) {
             outline: none;
             transition: box-shadow 0.3s, border 0.3s;
         }
-        .login-container input[type="text"]:focus {
+        .login-container input[type="email"]:focus,
+        .login-container input[type="password"]:focus {
             border: 1.5px solid #FFD700;
             box-shadow: 0 0 8px 2px rgba(255, 236, 139, 0.2);
         }
@@ -55,15 +55,13 @@ if (isset($_SESSION['user_id'])) {
                 unset($_SESSION['error']);
             }
             ?>
-            <form action="actions/register.php" method="POST" novalidate>
-                <input type="text" name="full_name" placeholder="Full Name" required autofocus />
-                <input type="email" name="email" placeholder="Email" required />
+            <form action="actions/login.php" method="POST" novalidate>
+                <input type="email" name="email" placeholder="Email" required autofocus />
                 <input type="password" name="password" placeholder="Password" required />
-                <input type="password" name="confirm_password" placeholder="Confirm Password" required />
-                <button type="submit">Register</button>
+                <button type="submit">Login</button>
             </form>
-            <p>Already have an account? <a href="login.php">Login here</a></p>
+            <p>No account? <a href="register.php">Register here</a></p>
         </div>
     </main>
 </body>
-</html>
+</html> 

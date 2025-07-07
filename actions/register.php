@@ -67,8 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bind_param("sssss", $username, $hashed_password, $full_name, $email, $role);
 
     if ($stmt->execute()) {
-        $_SESSION['success'] = 'Registration successful! Please login.';
-        header("Location: ../index.php");
+        header("Location: ../login.php");
         exit;
     } else {
         $_SESSION['error'] = 'Registration failed. Please try again.';

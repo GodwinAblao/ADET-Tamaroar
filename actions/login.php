@@ -33,19 +33,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Redirect based on role
             if ($user['role'] === 'admin') {
-                header("Location: ../admin/dashboard.php");
+                header("Location: ../admin/enhanced_dashboard.php");
             } else {
-                header("Location: ../student/dashboard.php");
+                header("Location: ../student/enhanced_dashboard.php");
             }
             exit;
         } else {
+            // If login fails, set error and redirect to login.php (not index.php)
             $_SESSION['error'] = 'Invalid email or password.';
-            header("Location: ../index.php");
+            header('Location: ../login.php');
             exit;
         }
     } else {
+        // If login fails, set error and redirect to login.php (not index.php)
         $_SESSION['error'] = 'Invalid email or password.';
-        header("Location: ../index.php");
+        header('Location: ../login.php');
         exit;
     }
 } else {

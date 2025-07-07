@@ -1,127 +1,159 @@
-<?php
-session_start();
-if (isset($_SESSION['user_id'])) {
-    header("Location: dashboard.php");
-    exit;
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Login - Tamaroar Library</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            height: 100vh;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-        }
-        .login-container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 2.5rem 3rem;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            backdrop-filter: blur(8.5px);
-            -webkit-backdrop-filter: blur(8.5px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            width: 100%;
-            max-width: 400px;
-            box-sizing: border-box;
-            text-align: center;
-        }
-        h2 {
-            font-weight: 700;
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-            letter-spacing: 2px;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .highlight {
-            color: #ffdd57;
-            font-weight: 900;
-            font-size: 2.5rem;
-            font-family: 'Segoe Script', cursive;
-            text-shadow: 0 3px 8px rgba(255, 221, 87, 0.7);
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-        input[type="email"],
-        input[type="password"] {
-            padding: 0.75rem 1rem;
-            margin-bottom: 1rem;
-            border: none;
-            border-radius: 30px;
-            font-size: 1rem;
-            outline: none;
-            transition: box-shadow 0.3s ease;
-        }
-        input[type="email"]:focus,
-        input[type="password"]:focus {
-            box-shadow: 0 0 8px 2px #ffdd57;
-        }
-        button {
-            padding: 0.75rem 1rem;
-            background-color: #ffdd57;
-            border: none;
-            border-radius: 30px;
-            color: #333;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 221, 87, 0.6);
-        }
-        button:hover {
-            background-color: #f0c419;
-        }
-        p {
-            margin-top: 1rem;
-            color: #eee;
-            font-size: 0.9rem;
-        }
-        p a {
-            color: #ffdd57;
-            text-decoration: none;
-            font-weight: 700;
-        }
-        p a:hover {
-            text-decoration: underline;
-        }
-        .error-message {
-            background-color: rgba(255, 0, 0, 0.7);
-            padding: 0.5rem 1rem;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            font-weight: 600;
-            color: #fff;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library System - Home</title>
+    <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-    <div class="login-container">
-        <h2><span class="highlight">Tamaroar</span> Library</h2>
-        <?php
-        if (isset($_SESSION['error'])) {
-            echo '<div class="error-message">' . htmlspecialchars($_SESSION['error']) . '</div>';
-            unset($_SESSION['error']);
+    <header>
+        <div class="logo-nav">
+            <img src="assets/logo.png" alt="Library Logo" class="logo">
+            <nav aria-label="Main Navigation">
+                <button class="nav-toggle" aria-label="Open navigation menu" aria-expanded="false">&#9776;</button>
+                <ul class="nav-list">
+                    <li><a href="index.php">Home</a></li>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="login.php" class="login-btn">Login</a></li>
+                    <li><a href="register.php" class="register-btn">Register</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <section class="hero fade-in" id="home">
+            <h1>Welcome to Tamaroar Library System</h1>
+            <p>Your gateway to knowledge and resources. Manage, borrow, and explore books with ease.</p>
+            <div class="cta-buttons">
+                <a href="login.php" class="btn btn-login">Login</a>
+                <a href="register.php" class="btn btn-register">Register</a>
+            </div>
+        </section>
+        <section id="about" class="about fade-in">
+            <div class="about-hero-card">
+                <h2>About Tamaroar Library</h2>
+                <p>Tamaroar Library is a modern digital library platform designed to empower students, staff, and the academic community. We provide seamless access to a vast collection of books and resources, innovative technology, and a supportive environment for learning and growth.</p>
+            </div>
+            <div class="about-mv-row">
+                <div class="about-mv-card about-vision">
+                    <h3>Vision</h3>
+                    <p>To be the leading digital library in the region, supporting academic excellence, personal growth, and a culture of lifelong learning through accessible and innovative library services.</p>
+                </div>
+                <div class="about-mv-card about-mission">
+                    <h3>Mission</h3>
+                    <p>To empower students and staff with seamless access to knowledge and resources, foster curiosity, and provide tools for success in academics and beyond.</p>
+                </div>
+            </div>
+            <div class="about-details">
+                <div class="about-details-card">
+                    <h3>Who Can Benefit from Us?</h3>
+                    <ul>
+                        <li><strong>Students:</strong> Access course materials, recommended readings, and research resources anytime, anywhere.</li>
+                        <li><strong>Faculty & Staff:</strong> Manage book collections, track borrowing, and support student learning.</li>
+                        <li><strong>Researchers:</strong> Discover a wide range of academic resources and references for your projects.</li>
+                        <li><strong>Community Members:</strong> Participate in events, workshops, and lifelong learning opportunities.</li>
+                    </ul>
+                </div>
+                <div class="about-details-card">
+                    <h3>How It Works?</h3>
+                    <ol>
+                        <li><strong>Register:</strong> Create your free account to get started.</li>
+                        <li><strong>Browse & Search:</strong> Explore our catalog and find the books or resources you need.</li>
+                        <li><strong>Borrow & Return:</strong> Borrow books online and return them with ease.</li>
+                        <li><strong>Track & Manage:</strong> Use your dashboard to track borrowed books, due dates, and fines.</li>
+                        <li><strong>Get Support:</strong> Reach out to our team for help or recommendations.</li>
+                    </ol>
+                    <a href="register.php" class="btn btn-register get-started-btn">Get Started</a>
+                </div>
+            </div>
+        </section>
+        <section id="contact" class="contact fade-in">
+            <h2>Contact</h2>
+            <form class="contact-form" aria-label="Contact form" method="post" action="#">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+                <label for="message">Message</label>
+                <textarea id="message" name="message" rows="4" required></textarea>
+                <button type="submit" class="btn btn-login">Send Message</button>
+            </form>
+            <div class="contact-info">
+                <p>Email: info@tamaroarlibrary.edu<br>Phone: (123) 456-7890</p>
+                <div class="social-icons">
+                    <a href="#" aria-label="Facebook"><img src="assets/social_facebook.png" alt="Facebook"></a>
+                    <a href="#" aria-label="Twitter"><img src="assets/social_twitter.png" alt="Twitter"></a>
+                    <a href="#" aria-label="Instagram"><img src="assets/social_instagram.png" alt="Instagram"></a>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <div class="footer-content">
+            <div class="footer-address">
+                <p>123 Library Ave, Tamaroar City, 12345</p>
+            </div>
+            <div class="footer-social">
+                <a href="#" aria-label="Facebook"><img src="assets/social_facebook.png" alt="Facebook"></a>
+                <a href="#" aria-label="Twitter"><img src="assets/social_twitter.png" alt="Twitter"></a>
+                <a href="#" aria-label="Instagram"><img src="assets/social_instagram.png" alt="Instagram"></a>
+            </div>
+        </div>
+        <p>&copy; 2024 Tamaroar Library System. All rights reserved.</p>
+    </footer>
+    <script>
+    // Hamburger menu for mobile
+    const navToggle = document.querySelector('.nav-toggle');
+    const navList = document.querySelector('.nav-list');
+    navToggle.addEventListener('click', function() {
+        const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+        navToggle.setAttribute('aria-expanded', !expanded);
+        navList.classList.toggle('open');
+    });
+    // Fade-in animation
+    window.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.classList.add('visible');
+        });
+    });
+    // Active nav highlighting on scroll
+    const navLinks = document.querySelectorAll('nav ul li a');
+    const sections = [
+        {id: 'home', link: navLinks[0]},
+        {id: 'about', link: navLinks[1]},
+        {id: 'contact', link: navLinks[2]}
+    ];
+    function setActiveNav() {
+        let scrollPos = window.scrollY || window.pageYOffset;
+        let offset = 120;
+        let found = false;
+        for (let i = sections.length - 1; i >= 0; i--) {
+            let section = document.getElementById(sections[i].id);
+            if (section && scrollPos + offset >= section.offsetTop) {
+                sections.forEach(s => s.link.classList.remove('active-nav'));
+                sections[i].link.classList.add('active-nav');
+                found = true;
+                break;
+            }
         }
-        ?>
-        <form action="actions/login.php" method="POST" novalidate>
-            <input type="email" name="email" placeholder="Email" required autofocus />
-            <input type="password" name="password" placeholder="Password" required />
-            <button type="submit">Login</button>
-        </form>
-        <p>No account? <a href="register.php">Register here</a></p>
-    </div>
+        if (!found) {
+            sections.forEach(s => s.link.classList.remove('active-nav'));
+        }
+    }
+    window.addEventListener('scroll', setActiveNav);
+    window.addEventListener('DOMContentLoaded', setActiveNav);
+    // Sticky header shadow on scroll
+    const header = document.querySelector('header');
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > 10) {
+            header.classList.add('sticky');
+        } else {
+            header.classList.remove('sticky');
+        }
+    });
+    </script>
 </body>
 </html>

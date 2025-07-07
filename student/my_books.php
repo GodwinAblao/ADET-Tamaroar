@@ -3,6 +3,7 @@ session_start();
 require_once '../config/db.php';
 require_once '../config/functions.php';
 
+// Check if user is logged in and is student
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
     header("Location: ../login.php");
     exit;
@@ -10,30 +11,28 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
 
 $user_id = $_SESSION['user_id'];
 
-// Get user's fines
+// Get current borrowings
+$stmt = $pdo->prepare("
+    SELECT b.*, bk.title, bk.author, bk.book_id as book_code, bk.cover_image
+    FROM borrowings b
+    JOIN books bk ON b.book_id = bk.id
+    WHERE b.user_id = ? AND b.status IN ('borrowed', 'overdue')
+    ORDER BY b.due_date ASC
+");
+$stmt->execute([$user_id]);
+$currentBorrowings = $stmt->fetchAll();
+
+// Get borrowing history
 $stmt = $pdo->prepare("
     SELECT b.*, bk.title, bk.author, bk.book_id as book_code
     FROM borrowings b
     JOIN books bk ON b.book_id = bk.id
-    WHERE b.user_id = ? AND b.fine_amount > 0
-    ORDER BY b.borrowed_date DESC
+    WHERE b.user_id = ? AND b.status = 'returned'
+    ORDER BY b.returned_date DESC
+    LIMIT 20
 ");
 $stmt->execute([$user_id]);
-$fines = $stmt->fetchAll();
-
-// Calculate total fines
-$totalFines = 0;
-$paidFines = 0;
-$unpaidFines = 0;
-
-foreach ($fines as $fine) {
-    $totalFines += $fine['fine_amount'];
-    if ($fine['fine_paid']) {
-        $paidFines += $fine['fine_amount'];
-    } else {
-        $unpaidFines += $fine['fine_amount'];
-    }
-}
+$borrowingHistory = $stmt->fetchAll();
 ?>
 
 <!DOCTYPE html>
@@ -41,7 +40,7 @@ foreach ($fines as $fine) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Fines - Student Panel</title>
+    <title>My Books - Student Panel</title>
     <link rel="stylesheet" href="../assets/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -142,46 +141,11 @@ foreach ($fines as $fine) {
             color: #666;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
+        .books-section {
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: var(--white);
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            text-align: center;
-            border-left: 4px solid var(--accent);
-        }
-
-        .stat-card h3 {
-            margin: 0 0 0.5rem 0;
-            color: var(--primary);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-card .number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        .stat-card .icon {
-            font-size: 2rem;
-            color: var(--accent);
-            margin-bottom: 1rem;
-        }
-
-        .fines-section {
-            background: var(--white);
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
@@ -196,7 +160,7 @@ foreach ($fines as $fine) {
             padding: 2rem;
         }
 
-        .fine-item {
+        .book-item {
             display: flex;
             align-items: center;
             padding: 1.5rem;
@@ -207,14 +171,14 @@ foreach ($fines as $fine) {
             background: var(--white);
         }
 
-        .fine-item:hover {
+        .book-item:hover {
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             transform: translateY(-2px);
         }
 
         .book-cover {
-            width: 60px;
-            height: 80px;
+            width: 80px;
+            height: 100px;
             background: var(--gray);
             border-radius: 8px;
             display: flex;
@@ -222,51 +186,51 @@ foreach ($fines as $fine) {
             justify-content: center;
             margin-right: 1.5rem;
             flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .book-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .book-cover i {
-            font-size: 1.5rem;
+            font-size: 2rem;
             color: var(--primary);
         }
 
-        .fine-info {
+        .book-info {
             flex: 1;
         }
 
-        .fine-info h4 {
+        .book-info h4 {
             color: var(--primary);
             margin-bottom: 0.5rem;
             font-size: 1.1rem;
         }
 
-        .fine-info p {
+        .book-info p {
             color: #666;
             margin-bottom: 0.5rem;
         }
 
-        .fine-details {
+        .book-details {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 1rem;
             margin-top: 1rem;
         }
 
-        .fine-detail {
+        .book-detail {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .fine-detail i {
+        .book-detail i {
             color: var(--primary);
             width: 16px;
-        }
-
-        .fine-amount {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #e74c3c;
-            margin-left: auto;
         }
 
         .status-badge {
@@ -274,17 +238,22 @@ foreach ($fines as $fine) {
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 500;
-            margin-left: 1rem;
+            margin-left: auto;
         }
 
-        .status-paid {
-            background: #d4edda;
-            color: #155724;
+        .status-borrowed {
+            background: #d1ecf1;
+            color: #0c5460;
         }
 
-        .status-unpaid {
+        .status-overdue {
             background: #f8d7da;
             color: #721c24;
+        }
+
+        .status-returned {
+            background: #d4edda;
+            color: #155724;
         }
 
         .empty-state {
@@ -303,6 +272,29 @@ foreach ($fines as $fine) {
             color: var(--primary);
             margin-bottom: 0.5rem;
         }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: #e6c200;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -314,8 +306,8 @@ foreach ($fines as $fine) {
             <ul class="nav-menu">
                 <li><a href="enhanced_dashboard.php"><i class="fas fa-home"></i> Dashboard</a></li>
                 <li><a href="enhanced_browse_books.php"><i class="fas fa-search"></i> Browse Books</a></li>
-                <li><a href="my_books.php"><i class="fas fa-book"></i> My Books</a></li>
-                <li><a href="fines.php" class="active"><i class="fas fa-money-bill-wave"></i> My Fines</a></li>
+                <li><a href="my_books.php" class="active"><i class="fas fa-book"></i> My Books</a></li>
+                <li><a href="fines.php"><i class="fas fa-money-bill-wave"></i> My Fines</a></li>
                 <li><a href="history.php"><i class="fas fa-history"></i> History</a></li>
                 <li><a href="profile.php"><i class="fas fa-user"></i> Profile</a></li>
                 <li><a href="../actions/logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
@@ -324,75 +316,100 @@ foreach ($fines as $fine) {
         
         <div class="main-content">
             <div class="page-header">
-                <h1 class="page-title">My Fines</h1>
-                <p class="page-subtitle">View and manage your library fines</p>
+                <h1 class="page-title">My Books</h1>
+                <p class="page-subtitle">Manage your borrowed books and view your reading history</p>
             </div>
             
-            <!-- Fines Statistics -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <i class="fas fa-exclamation-triangle icon"></i>
-                    <h3>Total Fines</h3>
-                    <div class="number">₱<?php echo number_format($totalFines, 2); ?></div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-times-circle icon"></i>
-                    <h3>Unpaid Fines</h3>
-                    <div class="number">₱<?php echo number_format($unpaidFines, 2); ?></div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-check-circle icon"></i>
-                    <h3>Paid Fines</h3>
-                    <div class="number">₱<?php echo number_format($paidFines, 2); ?></div>
-                </div>
-            </div>
-            
-            <!-- Fines List -->
-            <div class="fines-section">
+            <!-- Current Borrowings -->
+            <div class="books-section">
                 <div class="section-header">
-                    <h3>Fine Details</h3>
+                    <h3>Currently Borrowed</h3>
                 </div>
                 <div class="section-content">
-                    <?php if (empty($fines)): ?>
+                    <?php if (empty($currentBorrowings)): ?>
                         <div class="empty-state">
-                            <i class="fas fa-check-circle"></i>
-                            <h3>No Fines Found</h3>
-                            <p>Great! You don't have any library fines.</p>
+                            <i class="fas fa-book-open"></i>
+                            <h3>No Books Borrowed</h3>
+                            <p>You haven't borrowed any books yet. Start exploring our collection!</p>
+                            <a href="enhanced_browse_books.php" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Browse Books
+                            </a>
                         </div>
                     <?php else: ?>
-                        <?php foreach ($fines as $fine): ?>
-                            <div class="fine-item">
+                        <?php foreach ($currentBorrowings as $book): ?>
+                            <div class="book-item">
                                 <div class="book-cover">
-                                    <i class="fas fa-book"></i>
+                                    <?php if ($book['cover_image']): ?>
+                                        <img src="../<?php echo htmlspecialchars($book['cover_image']); ?>" alt="Book Cover">
+                                    <?php else: ?>
+                                        <i class="fas fa-book"></i>
+                                    <?php endif; ?>
                                 </div>
-                                <div class="fine-info">
-                                    <h4><?php echo htmlspecialchars($fine['title']); ?></h4>
-                                    <p>by <?php echo htmlspecialchars($fine['author']); ?></p>
-                                    <div class="fine-details">
-                                        <div class="fine-detail">
+                                <div class="book-info">
+                                    <h4><?php echo htmlspecialchars($book['title']); ?></h4>
+                                    <p>by <?php echo htmlspecialchars($book['author']); ?></p>
+                                    <div class="book-details">
+                                        <div class="book-detail">
                                             <i class="fas fa-calendar"></i>
-                                            <span>Due: <?php echo date('M d, Y', strtotime($fine['due_date'])); ?></span>
+                                            <span>Borrowed: <?php echo date('M d, Y', strtotime($book['borrowed_date'])); ?></span>
                                         </div>
-                                        <div class="fine-detail">
+                                        <div class="book-detail">
                                             <i class="fas fa-clock"></i>
-                                            <span>Days Overdue: <?php 
-                                                $due = new DateTime($fine['due_date']);
-                                                $today = new DateTime();
-                                                $interval = $due->diff($today);
-                                                echo $interval->days;
-                                            ?></span>
+                                            <span>Due: <?php echo date('M d, Y', strtotime($book['due_date'])); ?></span>
                                         </div>
-                                        <div class="fine-detail">
+                                        <div class="book-detail">
                                             <i class="fas fa-barcode"></i>
-                                            <span>Code: <?php echo htmlspecialchars($fine['book_code']); ?></span>
+                                            <span>Code: <?php echo htmlspecialchars($book['book_code']); ?></span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="fine-amount">
-                                    ₱<?php echo number_format($fine['fine_amount'], 2); ?>
+                                <span class="status-badge status-<?php echo $book['status']; ?>">
+                                    <?php echo ucfirst($book['status']); ?>
+                                </span>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Borrowing History -->
+            <div class="books-section">
+                <div class="section-header">
+                    <h3>Borrowing History</h3>
+                </div>
+                <div class="section-content">
+                    <?php if (empty($borrowingHistory)): ?>
+                        <div class="empty-state">
+                            <i class="fas fa-history"></i>
+                            <h3>No History Yet</h3>
+                            <p>Your borrowing history will appear here once you return books.</p>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($borrowingHistory as $book): ?>
+                            <div class="book-item">
+                                <div class="book-cover">
+                                    <i class="fas fa-book"></i>
                                 </div>
-                                <span class="status-badge status-<?php echo $fine['fine_paid'] ? 'paid' : 'unpaid'; ?>">
-                                    <?php echo $fine['fine_paid'] ? 'Paid' : 'Unpaid'; ?>
+                                <div class="book-info">
+                                    <h4><?php echo htmlspecialchars($book['title']); ?></h4>
+                                    <p>by <?php echo htmlspecialchars($book['author']); ?></p>
+                                    <div class="book-details">
+                                        <div class="book-detail">
+                                            <i class="fas fa-calendar"></i>
+                                            <span>Borrowed: <?php echo date('M d, Y', strtotime($book['borrowed_date'])); ?></span>
+                                        </div>
+                                        <div class="book-detail">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span>Returned: <?php echo date('M d, Y', strtotime($book['returned_date'])); ?></span>
+                                        </div>
+                                        <div class="book-detail">
+                                            <i class="fas fa-barcode"></i>
+                                            <span>Code: <?php echo htmlspecialchars($book['book_code']); ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="status-badge status-returned">
+                                    Returned
                                 </span>
                             </div>
                         <?php endforeach; ?>
