@@ -452,7 +452,7 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY name")->fetch_all(
                              data-status="<?php echo $book['status']; ?>">
                             <div class="book-cover">
                                 <?php if ($book['cover_image']): ?>
-                                    <img src="../<?php echo htmlspecialchars($book['cover_image']); ?>" alt="Book Cover">
+                                    <img src="../uploads/<?php echo htmlspecialchars($book['cover_image']); ?>" alt="Book Cover">
                                 <?php else: ?>
                                     <i class="fas fa-book"></i>
                                 <?php endif; ?>
@@ -536,13 +536,13 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY name")->fetch_all(
         // Archive/Restore functionality
         function archiveBook(bookId) {
             if (confirm('Are you sure you want to archive this book?')) {
-                window.location.href = `archive_book.php?id=${bookId}`;
+                window.location.href = `../actions/archive_book.php?id=${bookId}`;
             }
         }
 
         function restoreBook(bookId) {
             if (confirm('Are you sure you want to restore this book?')) {
-                window.location.href = `restore_book.php?id=${bookId}`;
+                window.location.href = `../actions/restore_book.php?id=${bookId}`;
             }
         }
     </script>

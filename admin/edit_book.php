@@ -365,7 +365,7 @@ $categories = $stmt->fetchAll();
                                 <label>Current Cover Image</label>
                                 <div class="current-cover">
                                     <?php if ($book['cover_image']): ?>
-                                        <img src="../<?php echo htmlspecialchars($book['cover_image']); ?>" alt="Book Cover">
+                                        <img src="../uploads/<?php echo htmlspecialchars($book['cover_image']); ?>" alt="Book Cover">
                                         <p style="margin-top: 0.5rem; color: #666;">Current cover image</p>
                                     <?php else: ?>
                                         <i class="fas fa-book" style="font-size: 3rem; color: var(--gray);"></i>

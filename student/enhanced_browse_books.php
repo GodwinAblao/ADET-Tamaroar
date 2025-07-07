@@ -525,7 +525,7 @@ $maxBooks = (int)getSystemSetting('max_books_per_student', 2);
                         <div class="book-card">
                             <div class="book-cover">
                                 <?php if ($book['cover_image']): ?>
-                                    <img src="../<?php echo htmlspecialchars($book['cover_image']); ?>" alt="Book Cover">
+                                    <img src="../uploads/<?php echo htmlspecialchars($book['cover_image']); ?>" alt="Book Cover">
                                 <?php else: ?>
                                     <i class="fas fa-book"></i>
                                 <?php endif; ?>
@@ -567,10 +567,15 @@ $maxBooks = (int)getSystemSetting('max_books_per_student', 2);
         </div>
     </div>
 
+    <!-- Hidden Borrow Form -->
+    <form id="borrowForm" action="../actions/borrow_book.php" method="POST" style="display:none;">
+        <input type="hidden" name="book_id" id="borrowBookId" value="">
+    </form>
     <script>
         function borrowBook(bookId, bookTitle) {
             if (confirm(`Are you sure you want to borrow "${bookTitle}"?`)) {
-                window.location.href = `borrow_book.php?id=${bookId}`;
+                document.getElementById('borrowBookId').value = bookId;
+                document.getElementById('borrowForm').submit();
             }
         }
     </script>

@@ -505,7 +505,7 @@ $notifications = getUserNotifications($_SESSION['user_id'], 5);
                             <div class="book-item">
                                 <div class="book-cover">
                                     <?php if ($borrowing['cover_image']): ?>
-                                        <img src="../<?php echo htmlspecialchars($borrowing['cover_image']); ?>" alt="Book Cover" style="width: 100%; height: 100%; object-fit: cover; border-radius: 5px;">
+                                        <img src="../uploads/<?php echo htmlspecialchars($borrowing['cover_image']); ?>" alt="Book Cover" style="width: 100%; height: 100%; object-fit: cover; border-radius: 5px;">
                                     <?php else: ?>
                                         <i class="fas fa-book"></i>
                                     <?php endif; ?>

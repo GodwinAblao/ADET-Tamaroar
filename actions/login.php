@@ -14,13 +14,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Check if email exists
-    $stmt = $conn->prepare("SELECT id, username, password, full_name, email, role FROM users WHERE email = ?");
+    $stmt = $conn->prepare("SELECT id, username, password, full_name, email, role, status FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
+        
+        // Check if user is suspended
+        if ($user['status'] === 'suspended') {
+            $_SESSION['error'] = 'Your account has been suspended. Please contact the administrator.';
+            header('Location: ../login.php');
+            exit;
+        }
         
         // Verify password
         if (password_verify($password, $user['password'])) {

@@ -1,0 +1,175 @@
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 26
+)
+Redirect: not available
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 26
+)
+Redirect: not available
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 26
+)
+Redirect: exception - Unknown column 'borrow_date' in 'field list'
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 26
+)
+Redirect: exception - Unknown column 'borrow_date' in 'field list'
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 26
+)
+Redirect: exception - Unknown column 'borrow_date' in 'field list'
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 26
+)
+Redirect: success to borrow_books.php
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 39
+)
+Redirect: success to borrow_books.php
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 39
+)
+Redirect: borrow limit
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 29
+)
+Redirect: success to borrow_books.php
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 29
+)
+Redirect: already borrowed
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 48
+)
+Redirect: success to borrow_books.php
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 48
+)
+Redirect: borrow limit
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 14
+)
+Redirect: success to borrow_books.php
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 14
+)
+Redirect: already borrowed
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 37
+)
+Redirect: success to borrow_books.php
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 37
+)
+Redirect: already borrowed
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 2
+)
+Redirect: success to borrow_books.php
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 2
+)
+Redirect: already borrowed
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 2
+)
+Redirect: already borrowed
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 2
+)
+Redirect: already borrowed
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 2
+)
+Redirect: already borrowed
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 2
+)
+Redirect: already borrowed
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 1
+)
+Redirect: success to borrow_books.php
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 10
+)
+Redirect: success to borrow_books.php
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 16
+)
+Redirect: success to borrow_books.php

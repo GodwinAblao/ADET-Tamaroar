@@ -340,7 +340,7 @@ $borrowingHistory = $stmt->fetchAll();
                             <div class="book-item">
                                 <div class="book-cover">
                                     <?php if ($book['cover_image']): ?>
-                                        <img src="../<?php echo htmlspecialchars($book['cover_image']); ?>" alt="Book Cover">
+                                        <img src="../uploads/<?php echo htmlspecialchars($book['cover_image']); ?>" alt="Book Cover">
                                     <?php else: ?>
                                         <i class="fas fa-book"></i>
                                     <?php endif; ?>

@@ -86,10 +86,17 @@ function calculateFine($due_date, $return_date = null) {
 /**
  * Check if user can borrow more books
  * Maximum 2 books per student
+ * User must not be suspended
  */
 function canUserBorrow($user_id) {
     global $conn;
     
+    // First check if user is suspended
+    if (isUserSuspended($user_id)) {
+        return false;
+    }
+    
+    // Then check borrow limit
     $stmt = $conn->prepare("SELECT COUNT(*) as borrowed_count FROM borrowings WHERE user_id = ? AND status = 'borrowed'");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
@@ -97,6 +104,47 @@ function canUserBorrow($user_id) {
     $row = $result->fetch_assoc();
     
     return $row['borrowed_count'] < 2;
+}
+
+/**
+ * Check if user account is suspended
+ */
+function isUserSuspended($user_id) {
+    global $conn;
+    
+    $stmt = $conn->prepare("SELECT status FROM users WHERE id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows === 1) {
+        $user = $result->fetch_assoc();
+        return $user['status'] === 'suspended';
+    }
+    
+    return false; // If user not found, assume not suspended
+}
+
+/**
+ * Suspend a user account
+ */
+function suspendUser($user_id, $reason = '') {
+    global $conn;
+    
+    $stmt = $conn->prepare("UPDATE users SET status = 'suspended', suspension_reason = ?, suspended_at = NOW() WHERE id = ?");
+    $stmt->bind_param("si", $reason, $user_id);
+    return $stmt->execute();
+}
+
+/**
+ * Unsuspend a user account
+ */
+function unsuspendUser($user_id) {
+    global $conn;
+    
+    $stmt = $conn->prepare("UPDATE users SET status = 'active', suspension_reason = NULL, suspended_at = NULL WHERE id = ?");
+    $stmt->bind_param("i", $user_id);
+    return $stmt->execute();
 }
 
 /**
@@ -112,7 +160,7 @@ function isBookAvailable($book_id) {
     
     if ($result->num_rows === 1) {
         $book = $result->fetch_assoc();
-        return $book['available_copies'] > 0 && $book['status'] === 'active';
+        return $book['available_copies'] > 0 && $book['status'] === 'available';
     }
     
     return false;

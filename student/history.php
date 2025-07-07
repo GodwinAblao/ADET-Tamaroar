@@ -364,7 +364,7 @@ foreach ($history as $record) {
                             <div class="history-item">
                                 <div class="book-cover">
                                     <?php if ($record['cover_image']): ?>
-                                        <img src="../<?php echo htmlspecialchars($record['cover_image']); ?>" alt="Book Cover">
+                                        <img src="../uploads/<?php echo htmlspecialchars($record['cover_image']); ?>" alt="Book Cover">
                                     <?php else: ?>
                                         <i class="fas fa-book"></i>
                                     <?php endif; ?>
