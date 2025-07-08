@@ -420,6 +420,21 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY name")->fetch_all(
                 </a>
             </div>
 
+            <!-- Success/Error Messages -->
+            <?php if (isset($_SESSION['success'])): ?>
+                <div class="success-message" style="background: #d4edda; color: #155724; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+                    <i class="fas fa-check-circle"></i> <?php echo $_SESSION['success']; ?>
+                </div>
+                <?php unset($_SESSION['success']); ?>
+            <?php endif; ?>
+
+            <?php if (isset($_SESSION['error'])): ?>
+                <div class="error-message" style="background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+                    <i class="fas fa-exclamation-triangle"></i> <?php echo $_SESSION['error']; ?>
+                </div>
+                <?php unset($_SESSION['error']); ?>
+            <?php endif; ?>
+
             <!-- Filters -->
             <div class="filters">
                 <h3><i class="fas fa-filter"></i> Filters</h3>
@@ -508,7 +523,7 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY name")->fetch_all(
                                             <i class="fas fa-undo"></i> Restore
                                         </button>
                                     <?php endif; ?>
-                                    <button class="action-btn delete-btn" onclick="confirmDelete(<?php echo $book['id']; ?>, '<?php echo htmlspecialchars($book['title']); ?>')">
+                                    <button class="action-btn delete-btn" onclick="confirmDelete(<?php echo $book['id']; ?>, '<?php echo addslashes(htmlspecialchars($book['title'])); ?>')">
                                         <i class="fas fa-trash"></i> Delete
                                     </button>
                                 </div>

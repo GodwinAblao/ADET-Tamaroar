@@ -19,13 +19,21 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 $book_id = (int)$_GET['id'];
 $admin_id = $_SESSION['user_id'];
 
+// Debug: Log the deletion attempt
+error_log("Attempting to delete book ID: $book_id by admin ID: $admin_id");
+
 // Use the safe delete function
 $result = safeDeleteBook($book_id, $admin_id);
 
+// Debug: Log the result
+error_log("Delete result: " . json_encode($result));
+
 if ($result['success']) {
     $_SESSION['success'] = $result['message'];
+    error_log("Book deletion successful: " . $result['message']);
 } else {
     $_SESSION['error'] = $result['message'];
+    error_log("Book deletion failed: " . $result['message']);
 }
 
 header("Location: ../admin/enhanced_manage_books.php");

@@ -629,14 +629,12 @@ function uploadBookCover($file, $bookId) {
  * Check if a book can be safely deleted
  */
 function canDeleteBook($bookId) {
-    global $conn;
+    global $pdo;
     
     // Check for active borrowings
-    $stmt = $conn->prepare("SELECT COUNT(*) as active_count FROM borrowings WHERE book_id = ? AND status IN ('borrowed', 'overdue')");
-    $stmt->bind_param("i", $bookId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $activeBorrowings = $result->fetch_assoc()['active_count'];
+    $stmt = $pdo->prepare("SELECT COUNT(*) as active_count FROM borrowings WHERE book_id = ? AND status IN ('borrowed', 'overdue')");
+    $stmt->execute([$bookId]);
+    $activeBorrowings = $stmt->fetch()['active_count'];
     
     if ($activeBorrowings > 0) {
         return [
@@ -647,11 +645,9 @@ function canDeleteBook($bookId) {
     }
     
     // Check for borrowing history
-    $stmt = $conn->prepare("SELECT COUNT(*) as history_count FROM borrowings WHERE book_id = ?");
-    $stmt->bind_param("i", $bookId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $borrowingHistory = $result->fetch_assoc()['history_count'];
+    $stmt = $pdo->prepare("SELECT COUNT(*) as history_count FROM borrowings WHERE book_id = ?");
+    $stmt->execute([$bookId]);
+    $borrowingHistory = $stmt->fetch()['history_count'];
     
     return [
         'can_delete' => true,
@@ -665,11 +661,16 @@ function canDeleteBook($bookId) {
  * Safely delete a book with all validations
  */
 function safeDeleteBook($bookId, $adminId) {
-    global $conn;
+    global $pdo;
+    
+    error_log("safeDeleteBook called with bookId: $bookId, adminId: $adminId");
     
     // Check if book can be deleted
     $canDelete = canDeleteBook($bookId);
+    error_log("canDelete result: " . json_encode($canDelete));
+    
     if (!$canDelete['can_delete']) {
+        error_log("Book cannot be deleted: " . $canDelete['reason']);
         return [
             'success' => false,
             'message' => $canDelete['reason']
@@ -677,29 +678,36 @@ function safeDeleteBook($bookId, $adminId) {
     }
     
     // Get book information for logging
-    $stmt = $conn->prepare("SELECT * FROM books WHERE id = ?");
-    $stmt->bind_param("i", $bookId);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt = $pdo->prepare("SELECT * FROM books WHERE id = ?");
+    $stmt->execute([$bookId]);
+    $book = $stmt->fetch();
     
-    if ($result->num_rows === 0) {
+    if (!$book) {
+        error_log("Book not found with ID: $bookId");
         return [
             'success' => false,
             'message' => 'Book not found.'
         ];
     }
     
-    $book = $result->fetch_assoc();
     $bookTitle = $book['title'];
     $bookAuthor = $book['author'];
     
-    $conn->begin_transaction();
+    error_log("Attempting to delete book: $bookTitle by $bookAuthor");
+    
+    $pdo->beginTransaction();
     
     try {
         // Delete the book
-        $stmt = $conn->prepare("DELETE FROM books WHERE id = ?");
-        $stmt->bind_param("i", $bookId);
-        $stmt->execute();
+        $stmt = $pdo->prepare("DELETE FROM books WHERE id = ?");
+        $stmt->execute([$bookId]);
+        
+        $deletedRows = $stmt->rowCount();
+        error_log("DELETE query affected $deletedRows rows");
+        
+        if ($deletedRows === 0) {
+            throw new Exception("No book was deleted. Book may not exist.");
+        }
         
         // Log the deletion activity
         $activityDescription = "Book deleted: '$bookTitle' by $bookAuthor (ID: $bookId)";
@@ -707,11 +715,17 @@ function safeDeleteBook($bookId, $adminId) {
             $activityDescription .= " - Had {$canDelete['borrowing_history']} borrowing records";
         }
         
-        $stmt = $conn->prepare("INSERT INTO activity_log (user_id, activity_type, description, created_at) VALUES (?, 'book_deleted', ?, NOW())");
-        $stmt->bind_param("is", $adminId, $activityDescription);
-        $stmt->execute();
+        try {
+            $stmt = $pdo->prepare("INSERT INTO activity_log (user_id, activity_type, description, created_at) VALUES (?, 'book_deleted', ?, NOW())");
+            $stmt->execute([$adminId, $activityDescription]);
+            error_log("Activity logged successfully");
+        } catch (Exception $e) {
+            error_log("Warning: Could not log activity - " . $e->getMessage());
+            // Continue with deletion even if logging fails
+        }
         
-        $conn->commit();
+        $pdo->commit();
+        error_log("Book deletion completed successfully");
         
         return [
             'success' => true,
@@ -720,7 +734,8 @@ function safeDeleteBook($bookId, $adminId) {
         ];
         
     } catch (Exception $e) {
-        $conn->rollback();
+        $pdo->rollback();
+        error_log("Error deleting book: " . $e->getMessage());
         return [
             'success' => false,
             'message' => 'Error deleting book: ' . $e->getMessage()
