@@ -384,6 +384,36 @@ $notifications = getUserNotifications($_SESSION['user_id'], 5);
             color: var(--gray);
             margin-bottom: 1rem;
         }
+
+        .btn-return {
+            background: #dc3545;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            margin-left: 1rem;
+        }
+
+        .btn-return:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .book-actions {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .fine-warning {
+            color: #dc3545;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            font-weight: 500;
+        }
         
         @media (max-width: 768px) {
             .sidebar {
@@ -516,11 +546,27 @@ $notifications = getUserNotifications($_SESSION['user_id'], 5);
                                     <div class="due-date">
                                         Due: <?php echo date('M d, Y', strtotime($borrowing['due_date'])); ?>
                                     </div>
+                                    <?php 
+                                    // Check if book is overdue and show fine warning
+                                    $due_date = new DateTime($borrowing['due_date']);
+                                    $today = new DateTime();
+                                    if ($due_date < $today): 
+                                        $days_overdue = $today->diff($due_date)->days;
+                                        $fine_amount = $days_overdue * 10; // ₱10 per day
+                                    ?>
+                                        <div class="fine-warning">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            Overdue by <?php echo $days_overdue; ?> day(s) - Fine: ₱<?php echo number_format($fine_amount, 2); ?>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
-                                <div class="book-status">
+                                <div class="book-actions">
                                     <div class="status-badge <?php echo $borrowing['status'] === 'overdue' ? 'status-overdue' : 'status-borrowed'; ?>">
                                         <?php echo ucfirst($borrowing['status']); ?>
                                     </div>
+                                    <button class="btn-return" onclick="returnBook(<?php echo $borrowing['id']; ?>, '<?php echo htmlspecialchars($borrowing['title']); ?>')">
+                                        <i class="fas fa-undo"></i> Return
+                                    </button>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -551,6 +597,25 @@ $notifications = getUserNotifications($_SESSION['user_id'], 5);
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('open');
+        }
+        
+        // Return book function
+        function returnBook(borrowingId, bookTitle) {
+            if (confirm(`Are you sure you want to return "${bookTitle}"?`)) {
+                // Create a form to submit the return request
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '../actions/return_book.php';
+                
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'borrowing_id';
+                input.value = borrowingId;
+                
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            }
         }
         
         // Auto-refresh every 30 seconds

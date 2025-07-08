@@ -300,16 +300,17 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY name")->fetch_all(
         }
         
         .action-btn {
-            flex: 1;
-            padding: 0.5rem;
+            padding: 0.5rem 1rem;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-size: 0.9rem;
-            font-weight: 600;
             transition: all 0.3s;
             text-decoration: none;
-            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.25rem;
         }
         
         .edit-btn {
@@ -319,24 +320,37 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY name")->fetch_all(
         
         .edit-btn:hover {
             background: #e6c200;
+            transform: translateY(-2px);
         }
         
         .archive-btn {
-            background: #ffebee;
-            color: #c62828;
+            background: #ffc107;
+            color: #212529;
         }
         
         .archive-btn:hover {
-            background: #ffcdd2;
+            background: #e0a800;
+            transform: translateY(-2px);
         }
         
         .restore-btn {
-            background: #e8f5e8;
-            color: #2e7d32;
+            background: #28a745;
+            color: white;
         }
         
         .restore-btn:hover {
-            background: #c8e6c9;
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .delete-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
         }
         
         .no-books {
@@ -388,6 +402,7 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY name")->fetch_all(
                 <li><a href="manage_students.php"><i class="fas fa-users"></i> Manage Students</a></li>
                 <li><a href="transactions.php"><i class="fas fa-exchange-alt"></i> Transactions</a></li>
                 <li><a href="fines_reports.php"><i class="fas fa-chart-bar"></i> Fines & Reports</a></li>
+                <li><a href="activity_log.php"><i class="fas fa-clock"></i> Activity Log</a></li>
                 <li><a href="settings.php"><i class="fas fa-cog"></i> Settings</a></li>
                 <li><a href="../actions/logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
@@ -493,7 +508,9 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY name")->fetch_all(
                                             <i class="fas fa-undo"></i> Restore
                                         </button>
                                     <?php endif; ?>
-                                    <span class="action-btn" style="background:#eee;color:#aaa;cursor:not-allowed;">🗑️ Delete (disabled)</span>
+                                    <button class="action-btn delete-btn" onclick="confirmDelete(<?php echo $book['id']; ?>, '<?php echo htmlspecialchars($book['title']); ?>')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -543,6 +560,13 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY name")->fetch_all(
         function restoreBook(bookId) {
             if (confirm('Are you sure you want to restore this book?')) {
                 window.location.href = `../actions/restore_book.php?id=${bookId}`;
+            }
+        }
+
+        // Confirm Delete functionality
+        function confirmDelete(bookId, bookTitle) {
+            if (confirm(`Are you sure you want to delete the book "${bookTitle}"? This action cannot be undone.`)) {
+                window.location.href = `confirm_delete_book.php?id=${bookId}`;
             }
         }
     </script>

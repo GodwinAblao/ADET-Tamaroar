@@ -16,19 +16,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate borrowing ID
     if ($borrowing_id <= 0) {
         $_SESSION['error'] = 'Invalid return request.';
-        header("Location: ../student/borrow_books.php");
+        header("Location: ../student/my_books.php");
         exit;
     }
 
     // Check if the borrow record exists and belongs to this user
-    $stmt = $conn->prepare("SELECT b.*, bk.title FROM borrowings b JOIN books bk ON b.book_id = bk.id WHERE b.id = ? AND b.user_id = ? AND b.status = 'borrowed'");
+    $stmt = $conn->prepare("SELECT b.*, bk.title FROM borrowings b JOIN books bk ON b.book_id = bk.id WHERE b.id = ? AND b.user_id = ? AND b.status IN ('borrowed', 'overdue')");
     $stmt->bind_param("ii", $borrowing_id, $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows === 0) {
         $_SESSION['error'] = 'Invalid borrow record or book already returned.';
-        header("Location: ../student/borrow_books.php");
+        header("Location: ../student/my_books.php");
         exit;
     }
 
@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         // Update borrowing record
-        $stmt = $conn->prepare("UPDATE borrowings SET return_date = ?, fine_amount = ?, status = 'returned' WHERE id = ?");
+        $stmt = $conn->prepare("UPDATE borrowings SET returned_date = ?, fine_amount = ?, status = 'returned' WHERE id = ?");
         $stmt->bind_param("sdi", $return_date, $fine_amount, $borrowing_id);
 
         if (!$stmt->execute()) {
@@ -66,18 +66,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['success'] = 'Book returned successfully! No fine incurred.';
         }
         
-        header("Location: ../student/borrow_books.php");
+        header("Location: ../student/my_books.php");
         exit;
 
     } catch (Exception $e) {
         // Rollback transaction
         $conn->rollback();
         $_SESSION['error'] = 'Error returning book: ' . $e->getMessage();
-        header("Location: ../student/borrow_books.php");
+        header("Location: ../student/my_books.php");
         exit;
     }
 } else {
-    header("Location: ../student/borrow_books.php");
+    header("Location: ../student/my_books.php");
     exit;
 }
 ?>

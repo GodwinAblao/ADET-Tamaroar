@@ -295,6 +295,30 @@ $borrowingHistory = $stmt->fetchAll();
             background: #e6c200;
             transform: translateY(-2px);
         }
+
+        .btn-return {
+            background: #dc3545;
+            color: white;
+            margin-left: 1rem;
+        }
+
+        .btn-return:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .book-actions {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .fine-warning {
+            color: #dc3545;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -319,6 +343,18 @@ $borrowingHistory = $stmt->fetchAll();
                 <h1 class="page-title">My Books</h1>
                 <p class="page-subtitle">Manage your borrowed books and view your reading history</p>
             </div>
+            
+            <?php if (isset($_SESSION['success'])): ?>
+                <div class="success-message" style="background: #d4edda; color: #155724; padding: 1rem; border-radius: 5px; margin-bottom: 1rem; border: 1px solid #c3e6cb;">
+                    <i class="fas fa-check-circle"></i> <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
+                </div>
+            <?php endif; ?>
+            
+            <?php if (isset($_SESSION['error'])): ?>
+                <div class="error-message" style="background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 5px; margin-bottom: 1rem; border: 1px solid #f5c6cb;">
+                    <i class="fas fa-exclamation-triangle"></i> <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+                </div>
+            <?php endif; ?>
             
             <!-- Current Borrowings -->
             <div class="books-section">
@@ -362,10 +398,28 @@ $borrowingHistory = $stmt->fetchAll();
                                             <span>Code: <?php echo htmlspecialchars($book['book_code']); ?></span>
                                         </div>
                                     </div>
+                                    <?php 
+                                    // Check if book is overdue and show fine warning
+                                    $due_date = new DateTime($book['due_date']);
+                                    $today = new DateTime();
+                                    if ($due_date < $today): 
+                                        $days_overdue = $today->diff($due_date)->days;
+                                        $fine_amount = $days_overdue * 10; // ₱10 per day
+                                    ?>
+                                        <div class="fine-warning">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            Overdue by <?php echo $days_overdue; ?> day(s) - Fine: ₱<?php echo number_format($fine_amount, 2); ?>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
-                                <span class="status-badge status-<?php echo $book['status']; ?>">
-                                    <?php echo ucfirst($book['status']); ?>
-                                </span>
+                                <div class="book-actions">
+                                    <span class="status-badge status-<?php echo $book['status']; ?>">
+                                        <?php echo ucfirst($book['status']); ?>
+                                    </span>
+                                    <button class="btn btn-return" onclick="returnBook(<?php echo $book['id']; ?>, '<?php echo htmlspecialchars($book['title']); ?>')">
+                                        <i class="fas fa-undo"></i> Return Book
+                                    </button>
+                                </div>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -418,5 +472,25 @@ $borrowingHistory = $stmt->fetchAll();
             </div>
         </div>
     </div>
+
+    <script>
+        function returnBook(borrowingId, bookTitle) {
+            if (confirm(`Are you sure you want to return "${bookTitle}"?`)) {
+                // Create a form to submit the return request
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '../actions/return_book.php';
+                
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'borrowing_id';
+                input.value = borrowingId;
+                
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
 </body>
 </html> 

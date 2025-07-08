@@ -12,6 +12,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 // Get admin dashboard statistics
 $stats = getAdminDashboardStats();
 
+// Get recent activities (limit to 3 for dashboard)
+$recentActivities = getRecentActivities(3);
+
 // Update overdue books status
 updateOverdueBooks();
 ?>
@@ -213,6 +216,44 @@ updateOverdueBooks();
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
+        .section-header-with-action {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .section-header-with-action h2 {
+            color: var(--primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-header-with-action h2 i {
+            margin-right: 0.5rem;
+            color: var(--accent);
+        }
+        
+        .see-more-btn {
+            background: var(--accent);
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .see-more-btn:hover {
+            background: #e6c200;
+            transform: translateY(-2px);
+        }
+        
         .activity-item {
             display: flex;
             align-items: center;
@@ -234,6 +275,11 @@ updateOverdueBooks();
             justify-content: center;
             margin-right: 1rem;
             color: white;
+            font-size: 1.1rem;
+        }
+
+        .activity-icon i {
+            color: inherit !important;
         }
         
         .activity-content h4 {
@@ -294,6 +340,7 @@ updateOverdueBooks();
                 <li><a href="manage_students.php"><i class="fas fa-users"></i> Manage Students</a></li>
                 <li><a href="transactions.php"><i class="fas fa-exchange-alt"></i> Transactions</a></li>
                 <li><a href="fines_reports.php"><i class="fas fa-chart-bar"></i> Fines & Reports</a></li>
+                <li><a href="activity_log.php"><i class="fas fa-clock"></i> Activity Log</a></li>
                 <li><a href="settings.php"><i class="fas fa-cog"></i> Settings</a></li>
                 <li><a href="../actions/logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
@@ -372,34 +419,84 @@ updateOverdueBooks();
 
             <!-- Recent Activity -->
             <div class="recent-activity">
-                <h2><i class="fas fa-clock"></i> Recent Activity</h2>
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-book"></i>
-                    </div>
-                    <div class="activity-content">
-                        <h4>System Updated</h4>
-                        <p>Overdue books status has been updated automatically</p>
-                    </div>
+                <div class="section-header-with-action">
+                    <h2><i class="fas fa-clock"></i> Recent Activity</h2>
+                    <a href="activity_log.php" class="see-more-btn">
+                        <i class="fas fa-external-link-alt"></i> See More
+                    </a>
                 </div>
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-users"></i>
+                <?php if (empty($recentActivities)): ?>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h4>No Recent Activity</h4>
+                            <p>No activities recorded in the last 7 days</p>
+                        </div>
                     </div>
-                    <div class="activity-content">
-                        <h4>Student Registration</h4>
-                        <p>New student accounts have been created</p>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-exchange-alt"></i>
-                    </div>
-                    <div class="activity-content">
-                        <h4>Book Transactions</h4>
-                        <p>Books have been borrowed and returned</p>
-                    </div>
-                </div>
+                <?php else: ?>
+                    <?php foreach ($recentActivities as $activity): ?>
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <?php 
+                                $icon = 'fas fa-info-circle';
+                                $color = 'var(--accent)';
+                                
+                                switch($activity['type']) {
+                                    case 'borrow':
+                                        $icon = 'fas fa-book';
+                                        $color = '#28a745';
+                                        break;
+                                    case 'return':
+                                        $icon = 'fas fa-undo';
+                                        $color = '#17a2b8';
+                                        break;
+                                    case 'registration':
+                                        $icon = 'fas fa-user-plus';
+                                        $color = '#ffc107';
+                                        break;
+                                    case 'book_added':
+                                        $icon = 'fas fa-plus-circle';
+                                        $color = '#6f42c1';
+                                        break;
+                                }
+                                ?>
+                                <i class="<?php echo $icon; ?>" style="color: <?php echo $color; ?>;"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h4>
+                                    <?php 
+                                    switch($activity['type']) {
+                                        case 'borrow':
+                                            echo htmlspecialchars($activity['user_name']) . ' borrowed a book';
+                                            break;
+                                        case 'return':
+                                            echo htmlspecialchars($activity['user_name']) . ' returned a book';
+                                            break;
+                                        case 'registration':
+                                            echo 'New student registered';
+                                            break;
+                                        case 'book_added':
+                                            echo 'New book added to collection';
+                                            break;
+                                    }
+                                    ?>
+                                </h4>
+                                <p>
+                                    <?php 
+                                    if ($activity['book_title']) {
+                                        echo '"' . htmlspecialchars($activity['book_title']) . '"';
+                                    } else {
+                                        echo htmlspecialchars($activity['user_name']);
+                                    }
+                                    ?>
+                                    • <?php echo date('M d, Y H:i', strtotime($activity['activity_date'])); ?>
+                                </p>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
     </div>

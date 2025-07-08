@@ -202,6 +202,7 @@ $transactions = $stmt->fetchAll();
                 <li><a href="manage_students.php"><i class="fas fa-users"></i> Manage Students</a></li>
                 <li><a href="transactions.php" class="active"><i class="fas fa-exchange-alt"></i> Transactions</a></li>
                 <li><a href="fines_reports.php"><i class="fas fa-chart-bar"></i> Fines & Reports</a></li>
+                <li><a href="activity_log.php"><i class="fas fa-clock"></i> Activity Log</a></li>
                 <li><a href="settings.php"><i class="fas fa-cog"></i> Settings</a></li>
                 <li><a href="../actions/logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
