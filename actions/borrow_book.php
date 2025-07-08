@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isUserSuspended($user_id)) {
             $_SESSION['error'] = 'Your account has been suspended. You cannot borrow books. Please contact the administrator.';
         } else {
-            $_SESSION['error'] = 'You can only borrow 2 books at a time. Please return a book first.';
+        $_SESSION['error'] = 'You can only borrow 2 books at a time. Please return a book first.';
         }
         file_put_contents(__DIR__.'/debug_borrow.txt', "Redirect: borrow limit\n", FILE_APPEND);
         header("Location: ../student/enhanced_browse_books.php");

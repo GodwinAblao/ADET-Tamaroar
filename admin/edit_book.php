@@ -294,23 +294,23 @@ $categories = $stmt->fetchAll();
                 </div>
             <?php endif; ?>
             
-            <?php if (isset($_SESSION['error'])): ?>
+    <?php if (isset($_SESSION['error'])): ?>
                 <div class="error-message">
                     <?php 
                     echo $_SESSION['error'];
                     unset($_SESSION['error']);
                     ?>
                 </div>
-            <?php endif; ?>
-            
+    <?php endif; ?>
+
             <div class="form-section">
                 <div class="section-header">
                     <h3>Book Information</h3>
                 </div>
                 <div class="section-content">
-                    <form action="../actions/update_book.php" method="POST" enctype="multipart/form-data">
+    <form action="../actions/update_book.php" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="id" value="<?php echo $book['id']; ?>">
-                        
+
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="title">Book Title</label>
@@ -334,44 +334,44 @@ $categories = $stmt->fetchAll();
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
-                            </div>
-                            
+        </div>
+
                             <div class="form-group">
                                 <label for="isbn">ISBN</label>
                                 <input type="text" id="isbn" name="isbn" 
                                        value="<?php echo htmlspecialchars($book['isbn'] ?? ''); ?>">
-                            </div>
-                            
+        </div>
+
                             <div class="form-group">
                                 <label for="published_date">Published Date</label>
                                 <input type="date" id="published_date" name="published_date" value="<?php echo $book['published_date']; ?>" required>
                                 <input type="hidden" id="published_year" name="published_year">
                                 <input type="hidden" id="published_month" name="published_month">
                                 <input type="hidden" id="published_day" name="published_day">
-                            </div>
-                            
+        </div>
+
                             <div class="form-group">
                                 <label for="copies">Number of Copies</label>
                                 <input type="number" id="copies" name="copies" min="1" 
                                        value="<?php echo $book['copies']; ?>" required>
-                            </div>
-                            
+        </div>
+
                             <div class="form-group full-width">
                                 <label for="description">Description</label>
                                 <textarea id="description" name="description" rows="4" 
                                           placeholder="Enter book description..."><?php echo htmlspecialchars($book['description'] ?? ''); ?></textarea>
-                            </div>
-                            
+        </div>
+
                             <div class="form-group full-width">
                                 <label>Current Cover Image</label>
                                 <div class="current-cover">
-                                    <?php if ($book['cover_image']): ?>
+            <?php if ($book['cover_image']): ?>
                                         <img src="../uploads/<?php echo htmlspecialchars($book['cover_image']); ?>" alt="Book Cover">
                                         <p style="margin-top: 0.5rem; color: #666;">Current cover image</p>
-                                    <?php else: ?>
+            <?php else: ?>
                                         <i class="fas fa-book" style="font-size: 3rem; color: var(--gray);"></i>
                                         <p style="margin-top: 0.5rem; color: #666;">No cover image uploaded</p>
-                                    <?php endif; ?>
+            <?php endif; ?>
                                 </div>
                             </div>
                             
@@ -382,8 +382,8 @@ $categories = $stmt->fetchAll();
                                     Leave empty to keep current image. Accepted formats: JPG, PNG, GIF
                                 </small>
                             </div>
-                        </div>
-                        
+        </div>
+
                         <div style="margin-top: 2rem;">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> Update Book
@@ -392,8 +392,8 @@ $categories = $stmt->fetchAll();
                                 <i class="fas fa-times"></i> Cancel
                             </a>
                         </div>
-                    </form>
-                </div>
+    </form>
+</div>
             </div>
         </div>
     </div>

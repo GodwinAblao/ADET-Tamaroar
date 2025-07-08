@@ -21,6 +21,12 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Add user status fields (from add_user_status.sql)
+ALTER TABLE users ADD COLUMN suspension_reason TEXT NULL;
+ALTER TABLE users ADD COLUMN suspended_at TIMESTAMP NULL;
+-- Update existing users to be active
+UPDATE users SET status = 'active' WHERE status IS NULL;
+
 -- Categories table (new)
 CREATE TABLE categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -101,6 +107,24 @@ CREATE TABLE system_settings (
     description TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+-- Activity log table (from create_activity_log_table.sql)
+CREATE TABLE IF NOT EXISTS activity_log (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  user_id int(11) NOT NULL,
+  activity_type varchar(50) NOT NULL,
+  description text NOT NULL,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY user_id (user_id),
+  KEY activity_type (activity_type),
+  KEY created_at (created_at),
+  CONSTRAINT activity_log_ibfk_1 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert some sample activity types
+INSERT INTO activity_log (user_id, activity_type, description, created_at) VALUES
+(1, 'system_init', 'Activity log table created', NOW());
 
 -- Insert default categories FIRST (before books to satisfy foreign key)
 INSERT INTO categories (name, description) VALUES
@@ -217,7 +241,7 @@ CREATE INDEX idx_fines_borrowing_id ON fines(borrowing_id);
 CREATE INDEX idx_fines_status ON fines(status);
 
 CREATE INDEX idx_notifications_user_id ON notifications(user_id);
-CREATE INDEX idx_notifications_is_read ON notifications(is_read);
+CREATE INDEX idx_notifications_is_read ON notifications(is_read); 
 CREATE INDEX idx_notifications_type ON notifications(type);
 
 CREATE INDEX idx_categories_name ON categories(name); 

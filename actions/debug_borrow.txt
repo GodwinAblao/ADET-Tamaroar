@@ -201,3 +201,45 @@ POST: Array
     [book_id] => 28
 )
 Redirect: borrow limit
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 28
+)
+Redirect: success to borrow_books.php
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 28
+)
+Redirect: already borrowed
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 26
+)
+Redirect: success to borrow_books.php
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 26
+)
+Redirect: already borrowed
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 11
+)
+Redirect: success to borrow_books.php
+
+==== New Request ====
+POST: Array
+(
+    [book_id] => 11
+)
+Redirect: borrow limit

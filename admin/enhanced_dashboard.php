@@ -9,14 +9,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
+// Update overdue books status
+updateOverdueBooks();
+
 // Get admin dashboard statistics
 $stats = getAdminDashboardStats();
 
 // Get recent activities (limit to 3 for dashboard)
 $recentActivities = getRecentActivities(3);
-
-// Update overdue books status
-updateOverdueBooks();
 ?>
 
 <!DOCTYPE html>

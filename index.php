@@ -155,5 +155,6 @@
         }
     });
     </script>
+    <!-- Botpress Chatbot Scripts removed from index.php -->
 </body>
 </html>

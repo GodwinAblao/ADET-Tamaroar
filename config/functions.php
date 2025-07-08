@@ -13,17 +13,17 @@ require_once 'db.php';
  */
 function generateBookId($title, $published_month, $published_day, $published_year, $category_id) {
     global $conn;
-
+    
     // Get first 2 letters from title (uppercase)
     $title_prefix = strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $title), 0, 2));
-
+    
     // Get month abbreviation
     $months = [
         1 => 'JAN', 2 => 'FEB', 3 => 'MAR', 4 => 'APR', 5 => 'MAY', 6 => 'JUN',
         7 => 'JUL', 8 => 'AUG', 9 => 'SEP', 10 => 'OCT', 11 => 'NOV', 12 => 'DEC'
     ];
     $month_abbr = $months[$published_month] ?? 'JAN';
-
+    
     // Use published day and year
     $day = str_pad($published_day, 2, '0', STR_PAD_LEFT);
     $year = $published_year;
@@ -38,7 +38,7 @@ function generateBookId($title, $published_month, $published_day, $published_yea
         // Map category name to code (first 3 uppercase letters, e.g., 'Fiction' => 'FIC')
         $category_code = strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $row['name']), 0, 3));
     }
-
+    
     // Get book count for this category
     $stmt = $conn->prepare("SELECT COUNT(*) as count FROM books WHERE category_id = ?");
     $stmt->bind_param("i", $category_id);
@@ -46,13 +46,13 @@ function generateBookId($title, $published_month, $published_day, $published_yea
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
     $book_count = $row['count'] + 1;
-
+    
     // Format book count with leading zeros
     $formatted_count = str_pad($book_count, 5, '0', STR_PAD_LEFT);
-
+    
     // Generate the book ID
     $book_id = $title_prefix . $month_abbr . $day . $year . '-' . $category_code . $formatted_count;
-
+    
     return $book_id;
 }
 

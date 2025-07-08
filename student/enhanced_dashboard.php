@@ -623,5 +623,6 @@ $notifications = getUserNotifications($_SESSION['user_id'], 5);
             location.reload();
         }, 30000);
     </script>
+    <!-- Botpress Chatbot Scripts removed from dashboard -->
 </body>
 </html> 

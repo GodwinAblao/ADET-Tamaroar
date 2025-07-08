@@ -10,28 +10,29 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
 
 $user_id = $_SESSION['user_id'];
 
-// Get user's fines
+// Get user's fines from the fines table, join borrowings for due_date and returned_date
 $stmt = $pdo->prepare("
-    SELECT b.*, bk.title, bk.author, bk.book_id as book_code
-    FROM borrowings b
-    JOIN books bk ON b.book_id = bk.id
-    WHERE b.user_id = ? AND b.fine_amount > 0
-    ORDER BY b.borrowed_date DESC
+    SELECT f.*, b.title, b.author, b.book_id as book_code, br.due_date, br.returned_date
+    FROM fines f
+    JOIN books b ON f.borrowing_id = b.id
+    JOIN borrowings br ON f.borrowing_id = br.id
+    WHERE f.user_id = ?
+    ORDER BY f.created_at DESC
 ");
 $stmt->execute([$user_id]);
 $fines = $stmt->fetchAll();
 
-// Calculate total fines
+// Calculate total, paid, and unpaid fines
 $totalFines = 0;
 $paidFines = 0;
 $unpaidFines = 0;
 
 foreach ($fines as $fine) {
-    $totalFines += $fine['fine_amount'];
-    if ($fine['fine_paid']) {
-        $paidFines += $fine['fine_amount'];
+    $totalFines += $fine['amount'];
+    if ($fine['status'] === 'paid') {
+        $paidFines += $fine['amount'];
     } else {
-        $unpaidFines += $fine['fine_amount'];
+        $unpaidFines += $fine['amount'];
     }
 }
 ?>
@@ -376,10 +377,14 @@ foreach ($fines as $fine) {
                                         <div class="fine-detail">
                                             <i class="fas fa-clock"></i>
                                             <span>Days Overdue: <?php 
-                                                $due = new DateTime($fine['due_date']);
-                                                $today = new DateTime();
-                                                $interval = $due->diff($today);
-                                                echo $interval->days;
+                                                $dueDate = $fine['due_date'];
+                                                $returnedDate = $fine['returned_date'];
+                                                $daysOverdue = 0;
+                                                if ($dueDate && $returnedDate) {
+                                                    $daysOverdue = ceil((strtotime($returnedDate) - strtotime($dueDate)) / 86400);
+                                                    if ($daysOverdue < 0) $daysOverdue = 0;
+                                                }
+                                                echo $daysOverdue;
                                             ?></span>
                                         </div>
                                         <div class="fine-detail">
@@ -389,10 +394,10 @@ foreach ($fines as $fine) {
                                     </div>
                                 </div>
                                 <div class="fine-amount">
-                                    ₱<?php echo number_format($fine['fine_amount'], 2); ?>
+                                    ₱<?php echo number_format($fine['amount'], 2); ?>
                                 </div>
-                                <span class="status-badge status-<?php echo $fine['fine_paid'] ? 'paid' : 'unpaid'; ?>">
-                                    <?php echo $fine['fine_paid'] ? 'Paid' : 'Unpaid'; ?>
+                                <span class="status-badge status-<?php echo $fine['status'] === 'paid' ? 'paid' : 'unpaid'; ?>">
+                                    <?php echo $fine['status'] === 'paid' ? 'Paid' : 'Unpaid'; ?>
                                 </span>
                             </div>
                         <?php endforeach; ?>

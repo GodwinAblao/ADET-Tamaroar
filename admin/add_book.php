@@ -328,8 +328,8 @@ $categories = $stmt->fetchAll();
                     unset($_SESSION['success']);
                     ?>
                 </div>
-            <?php endif; ?>
-            
+    <?php endif; ?>
+    
             <?php if (isset($_SESSION['error'])): ?>
                 <div class="error-message">
                     <?php 
@@ -337,69 +337,69 @@ $categories = $stmt->fetchAll();
                     unset($_SESSION['error']);
                     ?>
                 </div>
-            <?php endif; ?>
-            
+    <?php endif; ?>
+
             <div class="form-section">
                 <div class="section-header">
                     <h3>Book Information</h3>
                 </div>
                 <div class="section-content">
                     <form method="POST" action="../actions/add_book.php" enctype="multipart/form-data">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="title">Book Title *</label>
-                                <input type="text" id="title" name="title" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="author">Author *</label>
-                                <input type="text" id="author" name="author" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="category">Category *</label>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="title">Book Title *</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+
+            <div class="form-group">
+                <label for="author">Author *</label>
+                <input type="text" id="author" name="author" required>
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category *</label>
                                 <select id="category" name="category_id" required>
-                                    <option value="">Select Category</option>
+                    <option value="">Select Category</option>
                                     <?php foreach (
                                         $categories as $category): ?>
                                         <option value="<?php echo htmlspecialchars($category['id']); ?>">
                                             <?php echo htmlspecialchars($category['name']); ?>
                                         </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="form-group">
                                 <label for="isbn">ISBN</label>
                                 <input type="text" id="isbn" name="isbn" placeholder="Enter ISBN (optional)">
-                            </div>
-                            
-                            <div class="form-group">
+            </div>
+
+            <div class="form-group">
                                 <label for="published_date">Published Date *</label>
                                 <input type="date" id="published_date" name="published_date" required>
                                 <input type="hidden" id="published_year" name="published_year">
                                 <input type="hidden" id="published_month" name="published_month">
                                 <input type="hidden" id="published_day" name="published_day">
-                            </div>
-                            
-                            <div class="form-group">
+            </div>
+
+            <div class="form-group">
                                 <label for="copies">Number of Copies *</label>
                                 <input type="number" id="copies" name="copies" min="1" value="1" required>
-                            </div>
-                            
+            </div>
+
                             <div class="form-group full-width">
                                 <label for="description">Description</label>
                                 <textarea id="description" name="description" rows="4" 
                                           placeholder="Enter book description (optional)"></textarea>
-                            </div>
-                            
-                            <div class="form-group full-width">
-                                <label for="cover_image">Cover Image</label>
-                                <input type="file" id="cover_image" name="cover_image" accept="image/*">
-                                <small>Allowed formats: JPG, JPEG, PNG, GIF. Max size: 5MB</small>
-                            </div>
-                        </div>
-                        
+            </div>
+
+            <div class="form-group full-width">
+                <label for="cover_image">Cover Image</label>
+                <input type="file" id="cover_image" name="cover_image" accept="image/*">
+                <small>Allowed formats: JPG, JPEG, PNG, GIF. Max size: 5MB</small>
+            </div>
+        </div>
+
                         <div style="margin-top: 2rem;">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-plus"></i> Add Book
@@ -410,33 +410,33 @@ $categories = $stmt->fetchAll();
                             <a href="enhanced_manage_books.php" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> Cancel
                             </a>
-                        </div>
-                    </form>
+        </div>
+    </form>
                 </div>
             </div>
 
-            <!-- Book ID Preview -->
-            <div class="book-id-preview">
+    <!-- Book ID Preview -->
+    <div class="book-id-preview">
                 <div class="preview-header">
-                    <h3>Book ID Format</h3>
+        <h3>Book ID Format</h3>
                 </div>
                 <div class="preview-content">
-                    <p>The book ID will be automatically generated in the following format:</p>
-                    <div class="id-format">
-                        <code>THFEB102024-FIC00001</code>
-                    </div>
-                    <div class="id-explanation">
-                        <ul>
+        <p>The book ID will be automatically generated in the following format:</p>
+        <div class="id-format">
+            <code>THFEB102024-FIC00001</code>
+        </div>
+        <div class="id-explanation">
+            <ul>
                             <li><i class="fas fa-info-circle"></i><strong>TH</strong> - First 2 letters from the Book Title</li>
                             <li><i class="fas fa-calendar"></i><strong>FEB</strong> - Month abbreviation (published)</li>
                             <li><i class="fas fa-calendar-day"></i><strong>10</strong> - Day when added to system</li>
                             <li><i class="fas fa-calendar-year"></i><strong>2024</strong> - Current year</li>
                             <li><i class="fas fa-tag"></i><strong>FIC</strong> - Category code</li>
                             <li><i class="fas fa-hashtag"></i><strong>00001</strong> - Sequential number for this category</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+            </ul>
+        </div>
+    </div>
+</div>
         </div>
     </div>
     <script>

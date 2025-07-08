@@ -23,16 +23,20 @@ $history = $stmt->fetchAll();
 
 // Get statistics
 $totalBorrowed = count($history);
-$totalFines = 0;
-$totalPaid = 0;
+
+// Get total fines and paid fines from fines table
+$stmt = $pdo->prepare("SELECT SUM(amount) as total_fines FROM fines WHERE user_id = ?");
+$stmt->execute([$user_id]);
+$totalFines = $stmt->fetchColumn() ?: 0;
+
+$stmt = $pdo->prepare("SELECT SUM(amount) as total_paid FROM fines WHERE user_id = ? AND status = 'paid'");
+$stmt->execute([$user_id]);
+$totalPaid = $stmt->fetchColumn() ?: 0;
+
 $currentBorrowings = 0;
 $returnedBooks = 0;
 
 foreach ($history as $record) {
-    $totalFines += $record['fine_amount'];
-    if ($record['fine_paid']) {
-        $totalPaid += $record['fine_amount'];
-    }
     if ($record['status'] === 'borrowed' || $record['status'] === 'overdue') {
         $currentBorrowings++;
     } else if ($record['status'] === 'returned') {
@@ -409,6 +413,13 @@ foreach ($history as $record) {
                     </div>
                     <h3>Total Fines</h3>
                     <div class="number">₱<?php echo number_format($totalFines, 2); ?></div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <h3>Paid Fines</h3>
+                    <div class="number">₱<?php echo number_format($totalPaid, 2); ?></div>
                 </div>
             </div>
 

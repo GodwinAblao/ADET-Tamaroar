@@ -179,7 +179,7 @@ function processReturn($borrowingId) {
         // Get borrowing details
         $stmt = $conn->prepare("SELECT b.*, bk.title, bk.id as book_id FROM borrowings b 
                                JOIN books bk ON b.book_id = bk.id 
-                               WHERE b.id = ? AND b.status = 'borrowed'");
+                               WHERE b.id = ? AND b.status IN ('borrowed', 'overdue')");
         $stmt->bind_param("i", $borrowingId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -342,10 +342,12 @@ function getAdminDashboardStats() {
  */
 function updateOverdueBooks() {
     global $conn;
-    
-    $stmt = $conn->prepare("UPDATE borrowings SET status = 'overdue' 
-                           WHERE status = 'borrowed' AND due_date < NOW()");
-    return $stmt->execute();
+    $stmt = $conn->prepare("UPDATE borrowings SET status = 'overdue' WHERE status = 'borrowed' AND due_date < NOW()");
+    $success = $stmt->execute();
+    $affected = $stmt->affected_rows;
+    // Debug output
+    error_log('updateOverdueBooks: success=' . ($success ? 'true' : 'false') . ', affected_rows=' . $affected);
+    return $success;
 }
 
 /**

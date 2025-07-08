@@ -24,7 +24,8 @@ $stmt = $pdo->prepare("SELECT COUNT(*) as current_borrowed FROM borrowings WHERE
 $stmt->execute([$user_id]);
 $currentBorrowed = $stmt->fetchColumn();
 
-$stmt = $pdo->prepare("SELECT SUM(fine_amount) as total_fines FROM borrowings WHERE user_id = ? AND fine_amount > 0");
+// Get total fines from fines table (unpaid only)
+$stmt = $pdo->prepare("SELECT SUM(amount) as total_fines FROM fines WHERE user_id = ? AND status = 'pending'");
 $stmt->execute([$user_id]);
 $totalFines = $stmt->fetchColumn() ?: 0;
 
